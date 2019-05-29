@@ -36,7 +36,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                selectInput("in_logo_right",label="Logo right",c("None","NBIS Green","NBIS Blue","NBIS Orange","SciLifeLab Green","SciLifeLab Blue","SciLifeLab Orange","Elixir"),selected="None",multiple=FALSE)
         )
       ),
-      selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Default",multiple=FALSE,selectize=T),
+      selectInput("in_family",label="Font family",choices=c("Lato",sysfonts::font_families_google()),selected="Default",multiple=FALSE,selectize=T),
       fluidRow(
         column(12,
                style="padding-top:5px;padding-bottom:10px",
@@ -267,8 +267,6 @@ server <- function(input, output, session) {
         }
       }
 
-    print(l1y)
-    print(l2y)
     return(list(l1s=l1s,l1x=l1x,l1y=l1y,l2s=l2s,l2x=l2x,l2y=l2y,l3s=l3s,l3x=l3x,l3y=l3y,
                 llo=llo,lls=lls,lro=lro,lrs=lrs,lri=lri,lli=lli,f=f))
   })

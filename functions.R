@@ -6,6 +6,7 @@ library(shinythemes)
 library(shinyAce)
 library(png)
 library(ggplot2)
+library(curl)
 library(showtext)
 
 # validation
