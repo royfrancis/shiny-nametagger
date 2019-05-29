@@ -36,7 +36,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                selectInput("in_logo_right",label="Logo right",c("None","NBIS Green","NBIS Blue","NBIS Orange","SciLifeLab Green","SciLifeLab Blue","SciLifeLab Orange","Elixir"),selected="None",multiple=FALSE)
         )
       ),
-      selectInput("in_family",label="Font family",choices=c("Lato",sysfonts::font_families_google()),selected="Default",multiple=FALSE,selectize=T),
+      selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Lato",multiple=FALSE,selectize=T),
       fluidRow(
         column(12,
                style="padding-top:5px;padding-bottom:10px",
