@@ -58,6 +58,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                       helpText("Scale only controls preview here and does not affect download. Only page 1 is displayed below.",style="display:inline;")
                )
         ),
+      textOutput("out_pagecount"),
       tags$br(),
       imageOutput("out_plot")
       #verbatimTextOutput("out_display")
@@ -293,6 +294,17 @@ server <- function(input, output, session) {
                 alt="nametagger_image"))
   })
 
+  ## OUT: out_pagecount -------------------------------------------------------
+  ## prints general variables for debugging
+  
+  output$out_pagecount <- renderText({
+    
+    req(fn_input())
+
+    npages <- ceiling(nrow(fn_input())/8)
+    paste0("Showing 1 of ",npages," pages.")
+  })
+  
   ## OUT: out_display -------------------------------------------------------
   ## prints general variables for debugging
 

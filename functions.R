@@ -54,7 +54,6 @@ fn_validate <- function(input,message1,message2,message3)
 #' @title nametag_plot_page
 #' @description Creates a page with 1-8 nametags.
 #' @param dfr A data.frame. See details.
-#' @param id An ID label for export
 #' @param logo_right A raster logo to be placed on the right.
 #' @param logo_right_scale A scale value. Typically 0.1-0.4.
 #' @param logo_right_offset Logo offset from the edge. Around 0.01-0.1.
@@ -63,24 +62,16 @@ fn_validate <- function(input,message1,message2,message3)
 #' @param logo_left_offset Logo offset from the edge. Around 0.01-0.1.
 #' @param col_border Colour of clipping border. Defaults to "grey75".
 #' @param family A character denoting font family.
-#' @param export Logical indicating if the plot must be exported.
-#' @param filename A character denoting filename (prefix) of exported files.Defaults to 'nametag_' followed by page number and '.png'.
-#' @param path A character path to the directory where plot is to be exported. Do not add / at the end of the path.
 #' @param ret Logical indicating if the ggplot object must be returned.
 #' @param height Height of nametag in cm. Defaults to 5.5.
 #' @param width Width of nametag in cm. Defaults to 9.
-#' @param ftype Output file type. Defaults to 'png'. Optionally 'pdf'.
 #' @details Argument 'dfr' is a data.frame that must have columns
 #' label1, label1_x, label1_y, page, row and col.
 #' @export
 #'
-nametag_plot_page <- function(dfr,id,logo_right=NULL,logo_right_scale,logo_right_offset,
-                              logo_left=NULL,logo_left_scale,logo_left_offset,col_border="grey75",family="",
-                              export=FALSE,filename,path=".",ret=FALSE,height=5.5,width=9,ftype="png")
+nametag_plot_page <- function(dfr,logo_right=NULL,logo_right_scale,logo_right_offset,logo_left=NULL,logo_left_scale,logo_left_offset,col_border="grey75",family="",height=5.5,width=9)
 {
   if(missing(dfr)) stop("Input argument 'dfr' missing.")
-  if(missing(id)) id <- 1
-  if(missing(filename)) filename <- "nametag_"
 
   # check columns
   req_cols <- c("label1","label1_sz","label1_x","label1_y","page","row","col")
@@ -161,12 +152,7 @@ nametag_plot_page <- function(dfr,id,logo_right=NULL,logo_right_scale,logo_right
           plot.margin=margin(0.1,0.1,0.1,0.1),
           axis.ticks.length=unit(0,"pt"))
 
-  if(export) {
-    if(ftype=="png") ggsave(filename=paste0(path,"/",filename,id,".png"),plot=p,height=height*4,width=width*2,units="cm",dpi=300,device="png")
-    if(ftype=="pdf") ggsave(filename=paste0(path,"/",filename,id,".pdf"),plot=p,height=height*4*0.3937,width=width*2*0.3937,device="pdf")
-  }
-
-  if(ret) return(p)
+  return(p)
 }
 
 # nametag ----------------------------------------------------------------------
@@ -183,29 +169,37 @@ nametag_plot_page <- function(dfr,id,logo_right=NULL,logo_right_scale,logo_right
 #' @param label3_sz Size of label on line 3.
 #' @param label3_x X-axis coordinate for the label on line 3.
 #' @param label3_y Y-axis coordinate for the label on line 3.
-#' @param logo A raster logo
-#' @param logo_offset Logo offset from the edge. Around 0.01-0.1.
-#' @param logo_scale A scale value. Typically 0.1-0.4.
+#' @param logo_right A raster logo for the right side.
+#' @param logo_right_offset Logo offset from the edge. Around 0.01-0.1.
+#' @param logo_right_scale A scale value. Typically 0.1-0.4.
+#' @param logo_left A raster logo for the right side.
+#' @param logo_left_offset Logo offset from the edge. Around 0.01-0.1.
+#' @param logo_left_scale A scale value. Typically 0.1-0.4.
 #' @param family A character denoting font family.
+#' @param export Logical indicating if the plot must be exported.
 #' @param filename A character denoting filename (prefix) of exported files.Defaults to 'nametag_' followed by page number and '.png'.
 #' @param path A character path to the directory where file(s) are to be exported. Do not add / at the end of the path.
-#' @param ftype Export file type. 'png' or 'pdf'.
+#' @param ftype Export file type. 'png' or 'pdf'. Defaults to 'png'.
+#' @param height Height of nametag in cm. Defaults to 5.5.
+#' @param width Width of nametag in cm. Defaults to 9.
+#' @param verbose If progress messages should be printed to console.
 #' @details A data.frame with one column 'label1' is the only mandatory input for this function.
 #' @export
 #'
 nametag <- function(dfr,label1_sz=8,label1_x=0.5,label1_y=0.54,
                     label2_sz=6.5,label2_x=0.5,label2_y=0.37,
                     label3_sz=6,label3_x=0.5,label3_y=0.22,
-                    logo_right,logo_right_offset=0.04,logo_right_scale=0.2,
-                    logo_left,logo_left_offset=0.04,logo_left_scale=0.2,
-                    family="",filename="nametag_",path=".",ftype="png")
+                    logo_right=NULL,logo_right_offset=0.04,logo_right_scale=0.2,
+                    logo_left=NULL,logo_left_offset=0.04,logo_left_scale=0.2,
+                    family="",export=TRUE,filename="nametag_",path=".",ftype="png",height=5.5,width=9,verbose=TRUE)
 {
   if(missing(dfr)) stop("Input argument 'dfr' is missing.")
   if(!is.data.frame(dfr)) stop("Input argument 'dfr' must be a data.frame.")
   if(nrow(dfr)<1) stop("Input data must have at least 1 row.")
   if(!("label1"  %in% colnames(dfr))) stop("Input data must contain a column named 'label1'.")
   if("label3"  %in% colnames(dfr)) {if(!("label2"  %in% colnames(dfr))) stop("Column 'label3' is present, but 'label2' is missing. If 'label3' is used, 'label2' must be present." )}
-
+  if(is.null(filename)) filename <- "nametag_"
+  
   # compute tags and pages
   n <- nrow(dfr)
   npages <- ceiling(n/8)
@@ -242,8 +236,27 @@ nametag <- function(dfr,label1_sz=8,label1_x=0.5,label1_y=0.54,
   dflist <- split(dfw,dfw$page)
   ids <- names(dflist)
 
-  #plot_page(dflist[[1]],names(dflist)[1],img,logo_scale,logo_offset)
-  lapply(dflist,nametag_plot_page,ids,logo_right,logo_right_scale,logo_right_offset,logo_left,logo_left_scale,logo_left_offset,family=family,export=TRUE,filename=filename,path=path,ftype=ftype)
+  # creates plots and saves ggplot objects to a list
+  plist <- lapply(dflist,nametag_plot_page,logo_right,logo_right_scale,logo_right_offset,logo_left,logo_left_scale,logo_left_offset,family=family,height=height,width=width)
   #sapply(dflist,plot_page,logo,logo_scale,logo_offset,simplify=F,USE.NAMES=TRUE)
   #mapply(plot_page,dflist,ids,logo,logo_scale,logo_offset)
+  
+  # function to export images
+  efun <- function(p,id,height,width,filename,ftype,verbose) {
+    if(export) {
+      if(ftype=="png") {
+        fname <- paste0(path,"/",filename,id,".png")
+        ggsave(filename=fname,plot=p,height=height*4,width=width*2,units="cm",dpi=300,device="png")
+        if(verbose) cat(paste0("\n",fname," exported\n."))
+      }
+      if(ftype=="pdf") {
+        fname <- paste0(path,"/",filename,id,".pdf")
+        ggsave(filename=fname,plot=p,height=height*4*0.3937,width=width*2*0.3937,device="pdf")
+        if(verbose) cat(paste0("\n",fname," exported\n."))
+      }
+    }
+  }
+  
+  # exports images
+  mapply(function(p,id,height,width,filename,ftype,verbose) efun(p,id,height,width,filename,ftype,verbose),plist,ids,height,width,filename,ftype,verbose)
 }
