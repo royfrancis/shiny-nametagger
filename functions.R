@@ -9,6 +9,11 @@ library(ggplot2)
 library(curl)
 library(showtext)
 
+# fn_version
+fn_version <- function() {
+  return("v0.2")
+}
+
 # validation
 fn_validate <- function(input,message1,message2,message3)
 {

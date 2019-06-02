@@ -47,7 +47,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
       downloadButton("btn_download","Download"),
       checkboxInput("in_settings","Settings",value=FALSE),
       tags$hr(),
-      helpText("2019 | NBIS")
+      helpText(paste0("2019 | Roy Francis | Version: ",fn_version()))
     ),
     column(6,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
       sliderInput("in_scale","Image preview scale",min=0.1,max=1.5,step=0.10,value=0.6),
