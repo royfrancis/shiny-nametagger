@@ -11,7 +11,7 @@ library(showtext)
 
 # fn_version
 fn_version <- function() {
-  return("v0.2")
+  return("v0.21")
 }
 
 # validation
@@ -196,7 +196,7 @@ nametag <- function(dfr,label1_sz=8,label1_x=0.5,label1_y=0.54,
                     label3_sz=6,label3_x=0.5,label3_y=0.22,
                     logo_right=NULL,logo_right_offset=0.04,logo_right_scale=0.2,
                     logo_left=NULL,logo_left_offset=0.04,logo_left_scale=0.2,
-                    family="",export=TRUE,filename="nametag_",path=".",ftype="png",height=5.5,width=9,verbose=TRUE)
+                    family="",export=TRUE,filename="nametag_",path=".",ftype="png",height=5.5,width=9,verbose=FALSE)
 {
   if(missing(dfr)) stop("Input argument 'dfr' is missing.")
   if(!is.data.frame(dfr)) stop("Input argument 'dfr' must be a data.frame.")

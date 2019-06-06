@@ -1,16 +1,15 @@
 ## NAMETAGGER
 ## R shinyapp to generate nametags
 ## 2019 Roy Mathew Francis
-
+options(shiny.reactlog = TRUE)
 source("functions.R")
 
 # UI ---------------------------------------------------------------------------
 
-
 ui <- fluidPage(theme=shinytheme("flatly"),
   fixedRow(
       column(12,style="margin:15px;",
-    h1("Nametagger"),
+          HTML("<div style='margin-bottom:15px;'><img src='logo.png' alt='logo'></div>"),
     fixedRow(
     column(3,style="max-width:300px;background:#ebedef;padding-top:15px;padding-bottom:15px;border-radius:4px;",
       fluidRow(
@@ -36,14 +35,14 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                selectInput("in_logo_right",label="Logo right",c("None","NBIS Green","NBIS Blue","NBIS Orange","SciLifeLab Green","SciLifeLab Blue","SciLifeLab Orange","Elixir"),selected="None",multiple=FALSE)
         )
       ),
-      selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Lato",multiple=FALSE,selectize=T),
-      fluidRow(
-        column(12,
-               style="padding-top:5px;padding-bottom:10px",
-                      icon("info-circle",class="fa-lg"),
-                      helpText("Check https://fonts.google.com/ for google fonts.",style="display:inline;")
-               )
-        ),
+      #selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Lato",multiple=FALSE,selectize=T),
+      # fluidRow(
+      #   column(12,
+      #          style="padding-top:5px;padding-bottom:10px",
+      #                 icon("info-circle",class="fa-lg"),
+      #                 helpText("Check https://fonts.google.com/ for google fonts.",style="display:inline;")
+      #          )
+      #   ),
       downloadButton("btn_download","Download"),
       checkboxInput("in_settings","Settings",value=FALSE),
       tags$hr(),
@@ -188,7 +187,7 @@ server <- function(input, output, session) {
     validate(fn_validate(input$in_settings))
     validate(fn_validate(input$in_logo_left))
     validate(fn_validate(input$in_logo_right))
-    req(input$in_family)
+    #req(input$in_family)
     
     if("label1" %in% colnames(fn_input())) {l1 <- TRUE}else{l1 <- FALSE}
     if("label2" %in% colnames(fn_input())) {l2 <- TRUE}else{l2 <- FALSE}
@@ -259,14 +258,15 @@ server <- function(input, output, session) {
     
     # font is empty if default
     # if font is not available locally, check google and install
-    if(input$in_family=="Default") {
-        f <- ""
-      }else{
-        f <- input$in_family
-        if(!f %in% font_families()) {
-          if(f %in% font_families_google()) font_add_google(f)
-        }
-      }
+    # if(input$in_family=="Default") {
+    #     f <- ""
+    #   }else{
+    #     f <- input$in_family
+    #     if(!f %in% font_families()) {
+    #       if(f %in% font_families_google()) font_add_google(f)
+    #     }
+    #   }
+    f <- "Lato"
 
     return(list(l1s=l1s,l1x=l1x,l1y=l1y,l2s=l2s,l2x=l2x,l2y=l2y,l3s=l3s,l3x=l3x,l3y=l3y,
                 llo=llo,lls=lls,lro=lro,lrs=lrs,lri=lri,lli=lli,f=f))
