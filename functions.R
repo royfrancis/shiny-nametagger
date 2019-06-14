@@ -8,10 +8,11 @@ library(png)
 library(ggplot2)
 library(curl)
 library(showtext)
+library(shinyBS)
 
 # fn_version
 fn_version <- function() {
-  return("v0.21")
+  return("v0.22")
 }
 
 # validation

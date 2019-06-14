@@ -1,7 +1,7 @@
 ## NAMETAGGER
 ## R shinyapp to generate nametags
 ## 2019 Roy Mathew Francis
-options(shiny.reactlog = TRUE)
+
 source("functions.R")
 
 # UI ---------------------------------------------------------------------------
@@ -96,55 +96,68 @@ server <- function(input, output, session) {
           tags$b("Label 1"),
           fluidRow(
             column(4,style=list("padding-right: 3px;"),
-                   numericInput("in_label1_size",label="Size",value=8,min=4,max=12,step=0.5)
+                   numericInput("in_label1_size",label="Size",value=8,min=0,max=20,step=0.5),
+                   shinyBS::bsTooltip(id="in_label1_size",title="Size of label 1. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
             column(4,style=list("padding-right: 3px; padding-left: 3px;"),
-                   numericInput("in_label1_x",label="X pos",value=0.5,min=0,max=1,step=0.02)
+                   numericInput("in_label1_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label1_x",title="Horizontal position of label 1. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
             column(4,style=list("padding-left: 3px;"),
-                   numericInput("in_label1_y",label="Y pos",value=0.54,min=0,max=1,step=0.02)
+                   numericInput("in_label1_y",label="Ver pos",value=0.54,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label1_y",title="Vertical position of label 1. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Label 2"),
           fluidRow(
             column(4,style=list("padding-right: 3px;"),
-                   numericInput("in_label2_size",label="Size",value=6.5,min=4,max=12,step=0.5)
+                   numericInput("in_label2_size",label="Size",value=6.5,min=0,max=20,step=0.5),
+                   shinyBS::bsTooltip(id="in_label2_size",title="Size of label 2. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
             column(4,style=list("padding-right: 3px; padding-left: 3px;"),
-                   numericInput("in_label2_x",label="X pos",value=0.5,min=0,max=1,step=0.02)
+                   numericInput("in_label2_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label2_x",title="Horizontal position of label 2. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
             column(4,style=list("padding-left: 3px;"),
-                   numericInput("in_label2_y",label="Y pos",value=0.37,min=0,max=1,step=0.02)
+                   numericInput("in_label2_y",label="Ver pos",value=0.37,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label2_y",title="Vertical position of label 2. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Label 3"),
           fluidRow(
             column(4,style=list("padding-right: 3px;"),
-                   numericInput("in_label3_size",label="Size",value=6,min=4,max=12,step=0.5)
+                   numericInput("in_label3_size",label="Size",value=6,min=0,max=20,step=0.5),
+                   shinyBS::bsTooltip(id="in_label3_size",title="Size of label 3. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
             column(4,style=list("padding-right: 3px; padding-left: 3px;"),
-                   numericInput("in_label3_x",label="X pos",value=0.5,min=0,max=1,step=0.02)
+                   numericInput("in_label3_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label3_x",title="Horizontal position of label 3. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
             column(4,style=list("padding-left: 3px;"),
-                   numericInput("in_label3_y",label="Y pos",value=0.22,min=0,max=1,step=0.02)
+                   numericInput("in_label3_y",label="Ver pos",value=0.22,min=0,max=1,step=0.02),
+                   shinyBS::bsTooltip(id="in_label3_y",title="Vertical position of label 3. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Logo left"),
           fluidRow(
             column(6,style=list("padding-right: 3px;"),
-                   numericInput("in_logo_left_offset",label="Offset",value=0.02,min=0,max=0.2,step=0.01)
+                   numericInput("in_logo_left_offset",label="Offset",value=0.02,min=0,max=0.35,step=0.01),
+                   shinyBS::bsTooltip(id="in_logo_left_offset",title="Distance of left logo from left edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
             ),
             column(6,style=list("padding-left: 3px;"),
-                   numericInput("in_logo_left_scale",label="Width",value=0.2,min=0.1,max=0.6,step=0.01)
+                   numericInput("in_logo_left_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
+                   shinyBS::bsTooltip(id="in_logo_left_scale",title="Size of left logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
             )
           ),
           tags$b("Logo right"),
           fluidRow(
             column(6,style=list("padding-right: 3px;"),
-                   numericInput("in_logo_right_offset",label="Offset",value=0.02,min=0,max=0.2,step=0.01)
+                   numericInput("in_logo_right_offset",label="Offset",value=0.02,min=0,max=0.35,step=0.01),
+                   shinyBS::bsTooltip(id="in_logo_right_offset",title="Distance of right logo from right edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
             ),
             column(6,style=list("padding-left: 3px;"),
-                   numericInput("in_logo_right_scale",label="Width",value=0.2,min=0.1,max=0.6,step=0.01)
+                   numericInput("in_logo_right_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
+                   shinyBS::bsTooltip(id="in_logo_right_scale",title="Size of right logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
             )
           )
         )
@@ -208,7 +221,42 @@ server <- function(input, output, session) {
     if(is.null(input$in_logo_left_scale)){lls <- 0.2}else{lls <- input$in_logo_left_scale}
     if(is.null(input$in_logo_right_scale)){lrs <- 0.2}else{lrs <- input$in_logo_right_scale}
 
-    # logos
+    # validation ---------------------------------------------------------------
+    fn_val <- function(x) {
+      dp <- deparse(substitute(x))
+      dp <- switch(dp,"l1x"="Label 1 Hor pos","l2x"="Label 2 Hor pos",
+                   "l3x"="Label 3 Hor pos","l1y"="Label 1 Ver pos",
+                   "l2y"="Label 2 Ver pos","l3y"="Label 3 Ver pos",
+                   "lls"="Logo left scale","lrs"="Logo right scale")
+      if(x<0 | x>1) paste0("Input '",dp,"' must be between 0 and 1.")
+    }
+    validate(fn_val(l1x))
+    validate(fn_val(l2x))
+    validate(fn_val(l3x))
+    validate(fn_val(l1y))
+    validate(fn_val(l2y))
+    validate(fn_val(l3y))
+    validate(fn_val(lls))
+    validate(fn_val(lrs))
+    
+    fn_val_offset <- function(x) {
+      dp <- deparse(substitute(x))
+      dp <- switch(dp,"llo"="Logo left Offset","lro"="Logo right Offset")
+      if(x<0 | x>0.35) paste0("Input '",dp,"' must be between 0 and 0.35.")
+    }
+    validate(fn_val_offset(llo))
+    validate(fn_val_offset(lro))
+    
+    fn_val_size <- function(x) {
+      dp <- deparse(substitute(x))
+      dp <- switch(dp,"l1s"="Label 1 Size","l2s"="Label 2 Size","l3s"="Label 3 Size")
+      if(x<0 | x>20) paste0("Input '",dp,"' must be between 0.0 and 20.0.")
+    }
+    validate(fn_val_size(l1s))
+    validate(fn_val_size(l2s))
+    validate(fn_val_size(l3s))
+    
+    # logos --------------------------------------------------------------------
     lr = switch(
       input$in_logo_right,
       "None"=NULL,
