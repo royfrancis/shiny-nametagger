@@ -1,6 +1,6 @@
-## NAMETAGGER
+## nametagger
 ## R shinyapp to generate nametags
-## 2019 Roy Mathew Francis
+## 2020 Roy Mathew Francis
 
 source("functions.R")
 
@@ -9,7 +9,11 @@ source("functions.R")
 ui <- fluidPage(theme=shinytheme("flatly"),
   fixedRow(
       column(12,style="margin:15px;",
-          HTML("<div style='margin-bottom:15px;'><img src='logo.png' alt='logo'></div>"),
+             fluidRow(style="margin-bottom:10px;",
+                      span(tags$img(src='nbis-lime.png',style="height:18px;"),style="vertical-align:top;display:inline-block;"),
+                      span(tags$h4("•",style="margin:0px;margin-left:6px;margin-right:6px;"),style="vertical-align:top;display:inline-block;"),
+                      span(tags$h4(strong("Nametagger"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
+             ),
     fixedRow(
     column(3,style="max-width:300px;background:#ebedef;padding-top:15px;padding-bottom:15px;border-radius:4px;",
       fluidRow(
@@ -29,10 +33,10 @@ ui <- fluidPage(theme=shinytheme("flatly"),
         ),
       fluidRow(
         column(6,style=list("padding-right: 5px;"),
-               selectInput("in_logo_left",label="Logo left",choices=c("None","NBIS Green","NBIS Blue","NBIS Orange","SciLifeLab Green","SciLifeLab Blue","SciLifeLab Orange","Elixir"),selected="None",multiple=FALSE)
+               selectInput("in_logo_left",label="Logo left",choices=c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
         ),
         column(6,style=list("padding-left: 5px;"),
-               selectInput("in_logo_right",label="Logo right",c("None","NBIS Green","NBIS Blue","NBIS Orange","SciLifeLab Green","SciLifeLab Blue","SciLifeLab Orange","Elixir"),selected="None",multiple=FALSE)
+               selectInput("in_logo_right",label="Logo right",c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
         )
       ),
       #selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Lato",multiple=FALSE,selectize=T),
@@ -46,7 +50,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
       downloadButton("btn_download","Download"),
       checkboxInput("in_settings","Settings",value=FALSE),
       tags$hr(),
-      helpText(paste0("2019 | Roy Francis | Version: ",fn_version()))
+      helpText(paste0(format(Sys.time(),"%Y")," | Roy Francis | Version: ",fn_version()))
     ),
     column(6,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
       sliderInput("in_scale","Image preview scale",min=0.1,max=1.5,step=0.10,value=0.6),
@@ -71,7 +75,10 @@ ui <- fluidPage(theme=shinytheme("flatly"),
 # SERVER -----------------------------------------------------------------------
 
 server <- function(input, output, session) {
-                                  
+  
+  ## get temporary directory
+  store <- reactiveValues(epath=tempdir())
+  
   ## UI: ui_input --------------------------------------------------------------
   ## ui to select input type: upload or paste
   output$ui_input <- renderUI({
@@ -260,12 +267,10 @@ server <- function(input, output, session) {
     lr = switch(
       input$in_logo_right,
       "None"=NULL,
-      "NBIS Green"="./www/nbis_200_green.png",
-      "NBIS Blue"="./www/nbis_200_blue.png",
-      "NBIS Orange"="./www/nbis_200_orange.png",
-      "SciLifeLab Green"="./www/scilifelab_200_green.png",
-      "SciLifeLab Blue"="./www/scilifelab_200_blue.png",
-      "SciLifeLab Orange"="./www/scilifelab_200_orange.png",
+      "NBIS Lime"="./www/nbis-lime.png",
+      "NBIS Aqua"="./www/nbis-aqua.png",
+      "SciLifeLab Lime"="./www/scilifelab-lime.png",
+      "SciLifeLab Aqua"="./www/scilifelab-aqua.png",
       "Elixir"="./www/elixir_200.png"
     )
     if(!is.null(lr)) {lri <- readPNG(lr)}else{lri <- NULL}
@@ -273,12 +278,10 @@ server <- function(input, output, session) {
     ll = switch(
       input$in_logo_left,
       "None"=NULL,
-      "NBIS Green"="./www/nbis_200_green.png",
-      "NBIS Blue"="./www/nbis_200_blue.png",
-      "NBIS Orange"="./www/nbis_200_orange.png",
-      "SciLifeLab Green"="./www/scilifelab_200_green.png",
-      "SciLifeLab Blue"="./www/scilifelab_200_blue.png",
-      "SciLifeLab Orange"="./www/scilifelab_200_orange.png",
+      "NBIS Lime"="./www/nbis-lime.png",
+      "NBIS Aqua"="./www/nbis-aqua.png",
+      "SciLifeLab Lime"="./www/scilifelab-lime.png",
+      "SciLifeLab Aqua"="./www/scilifelab-aqua.png",
       "Elixir"="./www/elixir_200.png"
     )
     if(!is.null(ll)) {lli <- readPNG(ll)}else{lli <- NULL}
@@ -303,44 +306,41 @@ server <- function(input, output, session) {
         if(grepl("nbis",ll)) {llo <- 0.035; lls <- 0.2}
       }
     }
-    
-    # font is empty if default
-    # if font is not available locally, check google and install
-    # if(input$in_family=="Default") {
-    #     f <- ""
-    #   }else{
-    #     f <- input$in_family
-    #     if(!f %in% font_families()) {
-    #       if(f %in% font_families_google()) font_add_google(f)
-    #     }
-    #   }
-    f <- "Lato"
 
     return(list(l1s=l1s,l1x=l1x,l1y=l1y,l2s=l2s,l2x=l2x,l2y=l2y,l3s=l3s,l3x=l3x,l3y=l3y,
-                llo=llo,lls=lls,lro=lro,lrs=lrs,lri=lri,lli=lli,f=f))
+                llo=llo,lls=lls,lro=lro,lrs=lrs,lri=lri,lli=lli))
   })
 
   ## OUT: out_plot ------------------------------------------------------------
   ## plots figure
 
   output$out_plot <- renderImage({
-
+    
     validate(fn_validate(fn_input()))
     validate(fn_validate(fn_params()))
+    
+    progress1 <- shiny::Progress$new()
+    progress1$set(message="Capturing settings...", value=8)
+    
     p <- fn_params()
     
+    progress1$set(message="Generating figure...", value=30)
     nametag(dfr=fn_input(),label1_sz=p$l1s,label1_x=p$l1x,label1_y=p$l1y,
             label2_sz=p$l2s,label2_x=p$l2x,label2_y=p$l2y,
             label3_sz=p$l3s,label3_x=p$l3x,label3_y=p$l3y,
             logo_right=p$lri,logo_right_offset=p$lro,logo_right_scale=p$lrs,
             logo_left=p$lli,logo_left_offset=p$llo,logo_left_scale=p$lls,
-            family=p$f)
-
-    return(list(src="nametag_1.png",contentType="image/png",
+            family="gfont",path=store$epath,ftype="png")
+    fname <- file.path(store$epath,"nametag_1.png")
+    
+    progress1$set(message="Completed.", value=100)
+    progress1$close()
+    
+    return(list(src=fname,contentType="image/png",
                 width=round(9*2*37.7*input$in_scale,0),
                 height=round(5.5*4*37.7*input$in_scale,0),
                 alt="nametagger_image"))
-  })
+  },deleteFile=TRUE)
 
   ## OUT: out_pagecount -------------------------------------------------------
   ## prints general variables for debugging
@@ -374,25 +374,9 @@ server <- function(input, output, session) {
       "Logo left scale: ",input$in_logo_left_scale,"\n",
       "Logo right: ",input$in_logo_right,"\n",
       "Logo right offset: ",input$in_logo_right_offset,"\n",
-      "Logo right scale: ",input$in_logo_right_scale,"\n",
-      "Font: ",input$in_family,"\n"
+      "Logo right scale: ",input$in_logo_right_scale,"\n"
     ))
   })
-
-  ## FN: fn_temp ---------------------------------------------------------------
-  ## function to create filename and temporary dir
-  
-  # fn_temp <- reactive({
-  #   
-  #   req(fn_input())
-  #   
-  #   npages <- ceiling(nrow(fn_input())/8)
-  #   if(npages>1) {fname <- "nametag_1.zip"}else{fname <- "nametag_1.png"}
-  #   
-  #   store$npages <- npages
-  #   store$path <- tempdir()
-  #   store$fname <- paste0(store$path,"/",fname)
-  # })
   
   ## FN: fn_download -----------------------------------------------------------
   ## function to download a zipped file with images
@@ -408,11 +392,13 @@ server <- function(input, output, session) {
             label3_sz=p$l3s,label3_x=p$l3x,label3_y=p$l3y,
             logo_right=p$lri,logo_right_offset=p$lro,logo_right_scale=p$lrs,
             logo_left=p$lli,logo_left_offset=p$llo,logo_left_scale=p$lls,
-            path=".",family=p$f)
+            path=store$epath,family="gfont",ftype="pdf")
 
-    unlink("nametagger.zip")
-    zip("nametagger.zip",files=list.files()[grep("nametag_[0-9]+[.png$|.pdf$]",list.files())])
-    unlink(list.files()[grep("nametag_[0-9]+[.png$|.pdf$]",list.files())])
+    epathn <- file.path(store$epath,"nametagger.zip")
+    if(exists(epathn)) unlink(epathn)
+    
+    zip(epathn,files=list.files(path=store$epath,pattern="pdf",full.names=TRUE))
+    unlink(list.files(path=store$epath,pattern="pdf",full.names=TRUE))
   }
 
   ## DHL: btn_download ---------------------------------------------------------
@@ -421,8 +407,16 @@ server <- function(input, output, session) {
   output$btn_download <- downloadHandler(
     filename="nametagger.zip",
     content=function(file) {
+      
+      progress <- shiny::Progress$new()
+      progress$set(message="Generating PDFs...", value=52)
       fn_download()
-      file.copy("nametagger.zip",file,overwrite=T)
+      
+      progress$set(message="Downloading zipped file...", value=90)
+      file.copy(file.path(store$epath,"nametagger.zip"),file,overwrite=T)
+      
+      progress$set(message="Completed.",value=100)
+      progress$close()
     }
   )
 }

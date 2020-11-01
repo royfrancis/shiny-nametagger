@@ -1,6 +1,7 @@
-# NAMETAGGER
-# FUNCTIONS
+# nametagger
+# functions
 
+library(Cairo)
 library(shiny)
 library(shinythemes)
 library(shinyAce)
@@ -10,9 +11,12 @@ library(curl)
 library(showtext)
 library(shinyBS)
 
+if(!"gfont" %in% sysfonts::font_families()) font_add_google("Lato","gfont")
+showtext_opts(dpi=300)
+
 # fn_version
 fn_version <- function() {
-  return("v0.22")
+  return("v1.1.0")
 }
 
 # validation
@@ -250,16 +254,27 @@ nametag <- function(dfr,label1_sz=8,label1_x=0.5,label1_y=0.54,
   # function to export images
   efun <- function(p,id,height,width,filename,ftype,verbose) {
     if(export) {
-      if(ftype=="png") {
-        fname <- paste0(path,"/",filename,id,".png")
-        ggsave(filename=fname,plot=p,height=height*4,width=width*2,units="cm",dpi=300,device="png")
-        if(verbose) cat(paste0("\n",fname," exported\n."))
-      }
+      
       if(ftype=="pdf") {
-        fname <- paste0(path,"/",filename,id,".pdf")
-        ggsave(filename=fname,plot=p,height=height*4*0.3937,width=width*2*0.3937,device="pdf")
+        fname <- file.path(path,paste0(filename,id,".pdf"))
+        grDevices::cairo_pdf(file=fname,height=height*4*0.3937,width=width*2*0.3937)
+        showtext::showtext_begin()
+        print(p)
+        showtext::showtext_end()
+        dev.off()
         if(verbose) cat(paste0("\n",fname," exported\n."))
       }
+      
+      if(ftype=="png") {
+        fname <- file.path(path,paste0(filename,id,".png"))
+        grDevices::png(file=fname,width=width*2,height=height*4,units="cm",res=300,type="cairo")
+        showtext::showtext_begin()
+        print(p)
+        showtext::showtext_end()
+        dev.off()
+        if(verbose) cat(paste0("\n",fname," exported\n."))
+      }
+      
     }
   }
   
