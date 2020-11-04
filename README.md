@@ -1,4 +1,6 @@
-# shiny-nametagger [![gh-actions-build-status](https://github.com/royfrancis/shiny-nametagger/workflows/build/badge.svg)](https://github.com/royfrancis/shiny-nametagger/actions?workflow=build) [![docker-hub](https://img.shields.io/docker/image-size/royfrancis/shiny-nametagger?label=dockerhub)](https://hub.docker.com/repository/docker/royfrancis/shiny-nametagger)
+# shiny-nametagger
+
+[![gh-actions-build-status](https://github.com/royfrancis/shiny-nametagger/workflows/build/badge.svg)](https://github.com/royfrancis/shiny-nametagger/actions?workflow=build) [![docker-hub](https://img.shields.io/docker/image-size/royfrancis/shiny-nametagger?label=dockerhub)](https://hub.docker.com/repository/docker/royfrancis/shiny-nametagger)
 
 This is an R shiny app to create labels for clip-on name badges.
 
