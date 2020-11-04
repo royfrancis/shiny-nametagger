@@ -18,14 +18,14 @@ Click [here](https://roymf.shinyapps.io/nametagger/) to access an online instanc
 docker run --rm -p 8787:8787 royfrancis/shiny-nametagger:v1.1.0
 ```
 
-The app should be available through a web browser at `http://0.0.0.0:3838`.
+The app should be available through a web browser at `http://0.0.0.0:8787`.
 
 ### Run in R
 
 Install the following R packages:
 
 ```
-install.packages(c(Cairo, ggplot2, shiny, shinythemes, shinyAce, showtext, curl, shinyBS))
+install.packages(c("Cairo","curl","ggplot2","ggtext","png","shiny","shinythemes","shinyAce","shinyBS","showtext"))
 ```
 
 This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp("app.R")`.
