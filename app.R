@@ -7,6 +7,7 @@ source("functions.R")
 # UI ---------------------------------------------------------------------------
 
 ui <- fluidPage(theme=shinytheme("flatly"),
+tags$head(tags$link(rel="stylesheet",type="text/css",href="styles.css")),
   fixedRow(
       column(12,style="margin:15px;",
              fluidRow(style="margin-bottom:10px;",
@@ -27,8 +28,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
       fluidRow(
         column(12,
                style="padding-top:5px;padding-bottom:10px",
-                      icon("info-circle",class="fa-lg"),
-                      helpText("Input must contain column names. 'label1' is a mandatory column. Optional columns are 'label2' and 'label3'.",style="display:inline;")
+                      HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Input must contain column names. label1 is a mandatory column. Optional columns are label2 and label3.</div>')
                )
         ),
       fluidRow(
@@ -47,23 +47,22 @@ ui <- fluidPage(theme=shinytheme("flatly"),
       #                 helpText("Check https://fonts.google.com/ for google fonts.",style="display:inline;")
       #          )
       #   ),
-      downloadButton("btn_download","Download"),
       checkboxInput("in_settings","Settings",value=FALSE),
-      tags$hr(),
-      helpText(paste0(format(Sys.time(),"%Y")," | Roy Francis | Version: ",fn_version()))
+      div(style="margin-top:25px;margin-bottom:20px;",downloadButton("btn_download","Download")),
+      div(style="font-size:0.8em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
     ),
     column(6,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
-      sliderInput("in_scale","Image preview scale",min=0.1,max=1.5,step=0.10,value=0.6),
+      sliderInput("in_scale","Image preview scale",min=0.1,max=1.5,step=0.10,value=0.6,width="100%"),
       fluidRow(
-        column(12,
-               style="padding-top:5px;padding-bottom:10px",
-                      icon("info-circle",class="fa-lg"),
-                      helpText("Scale only controls preview here and does not affect download. Only page 1 is displayed below.",style="display:inline;")
-               )
-        ),
+        column(12,style="padding-top:5px;padding-bottom:10px",
+               HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Scale controls preview below and does not affect download. Only page 1 is displayed below.</div>')
+        )
+      ),
       textOutput("out_pagecount"),
       tags$br(),
-      imageOutput("out_plot")
+      div(class="img-output",
+          imageOutput("out_plot",width="auto",height="auto")
+      )
       #verbatimTextOutput("out_display")
     ),
     uiOutput("ui_settings")
@@ -98,7 +97,7 @@ server <- function(input, output, session) {
 
     if(input$in_settings) {
       column(3,style="max-width:300px;border-radius:4px;background:#ebedef;",
-        h4("Settings"),
+        h3("Settings"),
         div(
           tags$b("Label 1"),
           fluidRow(
@@ -157,7 +156,7 @@ server <- function(input, output, session) {
             )
           ),
           tags$b("Logo right"),
-          fluidRow(
+          fluidRow(style="margin-bottom:10px;",
             column(6,style=list("padding-right: 3px;"),
                    numericInput("in_logo_right_offset",label="Offset",value=0.02,min=0,max=0.35,step=0.01),
                    shinyBS::bsTooltip(id="in_logo_right_offset",title="Distance of right logo from right edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
