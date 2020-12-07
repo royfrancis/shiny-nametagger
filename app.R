@@ -16,54 +16,33 @@ tags$head(tags$link(rel="stylesheet",type="text/css",href="styles.css")),
                       span(tags$h4(strong("Nametagger"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
              ),
     fixedRow(
-    column(3,style="max-width:300px;background:#ebedef;padding-top:15px;padding-bottom:15px;border-radius:4px;",
+    column(3,class="box-left",
       fluidRow(
-        column(6,style=list("padding-right:5px;"),
+        column(6,class="no-pad-right",
                selectInput("in_input","Input method",choices=c("Upload file","Paste text"),
                            selected="Paste text",multiple=FALSE)),
-        column(6,style=list("padding-left: 5px;"),
+        column(6,class="no-pad-left",
                selectInput("in_data_format","File format",choices=c("tsv","csv","csv2"),selected="csv",multiple=FALSE))
         ),
       uiOutput("ui_input"),
       fluidRow(
-        column(12,
-               style="padding-top:5px;padding-bottom:10px",
-                      HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Input must contain column names. label1 is a mandatory column. Optional columns are label2 and label3.</div>')
-               )
-        ),
-      fluidRow(
-        column(6,style=list("padding-right: 5px;"),
+        column(6,class="no-pad-right",
                selectInput("in_logo_left",label="Logo left",choices=c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
         ),
-        column(6,style=list("padding-left: 5px;"),
+        column(6,class="no-pad-left",
                selectInput("in_logo_right",label="Logo right",c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
         )
       ),
-      #selectInput("in_family",label="Font family",choices=c("Default",sysfonts::font_families_google()),selected="Lato",multiple=FALSE,selectize=T),
-      # fluidRow(
-      #   column(12,
-      #          style="padding-top:5px;padding-bottom:10px",
-      #                 icon("info-circle",class="fa-lg"),
-      #                 helpText("Check https://fonts.google.com/ for google fonts.",style="display:inline;")
-      #          )
-      #   ),
       checkboxInput("in_settings","Settings",value=FALSE),
       div(style="margin-top:25px;margin-bottom:20px;",downloadButton("btn_download","Download")),
       div(style="font-size:0.8em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
     ),
-    column(6,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
-      sliderInput("in_scale","Image preview scale",min=0.1,max=1.5,step=0.10,value=0.6,width="100%"),
-      fluidRow(
-        column(12,style="padding-top:5px;padding-bottom:10px",
-               HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Scale controls preview below and does not affect download. Only page 1 is displayed below.</div>')
-        )
-      ),
+    column(6,class="box-right",
       textOutput("out_pagecount"),
       tags$br(),
       div(class="img-output",
           imageOutput("out_plot",width="auto",height="auto")
       )
-      #verbatimTextOutput("out_display")
     ),
     uiOutput("ui_settings")
     )
@@ -86,7 +65,10 @@ server <- function(input, output, session) {
     if(input$in_input=="Upload file") {
       fileInput("in_data","Upload a text file.",multiple=FALSE)
     }else{
-      shinyAce::aceEditor("in_data","label1,label2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University",mode="text",theme="textmate",readOnly=FALSE,height="150px",fontSize=12)
+      div(
+        textAreaInput("in_data","Data",value="label1,label2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University",width="100%",resize="vertical",height="100px"),
+        shinyBS::bsTooltip(id="in_data",title="Input must contain column names. label1 is a mandatory column. Optional columns are label2 and label3.",placement="top",trigger="hover")
+      )
     }
   })
 
@@ -96,72 +78,71 @@ server <- function(input, output, session) {
     validate(fn_validate(input$in_settings))
 
     if(input$in_settings) {
-      column(3,style="max-width:300px;border-radius:4px;background:#ebedef;",
-        h3("Settings"),
+      column(3,class="box-left",
         div(
           tags$b("Label 1"),
           fluidRow(
-            column(4,style=list("padding-right: 3px;"),
+            column(4,class="no-pad-right",
                    numericInput("in_label1_size",label="Size",value=8,min=0,max=20,step=0.5),
                    shinyBS::bsTooltip(id="in_label1_size",title="Size of label 1. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
-            column(4,style=list("padding-right: 3px; padding-left: 3px;"),
+            column(4,class="no-pad-right no-pad-left",
                    numericInput("in_label1_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label1_x",title="Horizontal position of label 1. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
-            column(4,style=list("padding-left: 3px;"),
+            column(4,class="no-pad-left",
                    numericInput("in_label1_y",label="Ver pos",value=0.54,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label1_y",title="Vertical position of label 1. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Label 2"),
           fluidRow(
-            column(4,style=list("padding-right: 3px;"),
+            column(4,class="no-pad-right",
                    numericInput("in_label2_size",label="Size",value=6.5,min=0,max=20,step=0.5),
                    shinyBS::bsTooltip(id="in_label2_size",title="Size of label 2. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
-            column(4,style=list("padding-right: 3px; padding-left: 3px;"),
+            column(4,class="no-pad-right no-pad-left",
                    numericInput("in_label2_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label2_x",title="Horizontal position of label 2. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
-            column(4,style=list("padding-left: 3px;"),
+            column(4,class="no-pad-left",
                    numericInput("in_label2_y",label="Ver pos",value=0.37,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label2_y",title="Vertical position of label 2. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Label 3"),
           fluidRow(
-            column(4,style=list("padding-right: 3px;"),
+            column(4,class="no-pad-right",
                    numericInput("in_label3_size",label="Size",value=6,min=0,max=20,step=0.5),
                    shinyBS::bsTooltip(id="in_label3_size",title="Size of label 3. A value between 0 and 20.0.",placement="top",trigger="hover")
             ),
-            column(4,style=list("padding-right: 3px; padding-left: 3px;"),
+            column(4,class="no-pad-right no-pad-left",
                    numericInput("in_label3_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label3_x",title="Horizontal position of label 3. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
             ),
-            column(4,style=list("padding-left: 3px;"),
+            column(4,class="no-pad-left",
                    numericInput("in_label3_y",label="Ver pos",value=0.22,min=0,max=1,step=0.02),
                    shinyBS::bsTooltip(id="in_label3_y",title="Vertical position of label 3. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
             )
           ),
           tags$b("Logo left"),
           fluidRow(
-            column(6,style=list("padding-right: 3px;"),
-                   numericInput("in_logo_left_offset",label="Offset",value=0.02,min=0,max=0.35,step=0.01),
+            column(6,class="no-pad-right",
+                   numericInput("in_logo_left_offset",label="Offset",value=0.03,min=0,max=0.35,step=0.01),
                    shinyBS::bsTooltip(id="in_logo_left_offset",title="Distance of left logo from left edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
             ),
-            column(6,style=list("padding-left: 3px;"),
+            column(6,class="no-pad-left",
                    numericInput("in_logo_left_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
                    shinyBS::bsTooltip(id="in_logo_left_scale",title="Size of left logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
             )
           ),
           tags$b("Logo right"),
           fluidRow(style="margin-bottom:10px;",
-            column(6,style=list("padding-right: 3px;"),
-                   numericInput("in_logo_right_offset",label="Offset",value=0.02,min=0,max=0.35,step=0.01),
+            column(6,class="no-pad-right",
+                   numericInput("in_logo_right_offset",label="Offset",value=0.03,min=0,max=0.35,step=0.01),
                    shinyBS::bsTooltip(id="in_logo_right_offset",title="Distance of right logo from right edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
             ),
-            column(6,style=list("padding-left: 3px;"),
+            column(6,class="no-pad-left",
                    numericInput("in_logo_right_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
                    shinyBS::bsTooltip(id="in_logo_right_scale",title="Size of right logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
             )
@@ -295,13 +276,13 @@ server <- function(input, output, session) {
       
       if(!is.null(lr)) {
         if(grepl("elixir",lr)) {lro <- 0.02; lrs <- 0.2}
-        if(grepl("scilifelab",lr)) {lro <- 0.035; lrs <- 0.32}
+        if(grepl("scilifelab",lr)) {lro <- 0.035; lrs <- 0.33}
         if(grepl("nbis",lr)) {lro <- 0.035; lrs <- 0.2}
       }
 
       if(!is.null(ll)) {
         if(grepl("elixir",ll)) {llo <- 0.02; lls <- 0.2}
-        if(grepl("scilifelab",ll)) {llo <- 0.035; lls <- 0.32}
+        if(grepl("scilifelab",ll)) {llo <- 0.035; lls <- 0.33}
         if(grepl("nbis",ll)) {llo <- 0.035; lls <- 0.2}
       }
     }
@@ -335,9 +316,10 @@ server <- function(input, output, session) {
     progress1$set(message="Completed.", value=100)
     progress1$close()
     
+    scaling <- 0.62
     return(list(src=fname,contentType="image/png",
-                width=round(9*2*37.7*input$in_scale,0),
-                height=round(5.5*4*37.7*input$in_scale,0),
+                width=round(9*2*37.7*scaling,0),
+                height=round(5.5*4*37.7*scaling,0),
                 alt="nametagger_image"))
   },deleteFile=TRUE)
 
@@ -350,31 +332,6 @@ server <- function(input, output, session) {
 
     npages <- ceiling(nrow(fn_input())/8)
     paste0("Showing 1 of ",npages," pages.")
-  })
-  
-  ## OUT: out_display -------------------------------------------------------
-  ## prints general variables for debugging
-
-  output$out_display <- renderPrint({
-    cat(paste0(
-      "Input type: ",input$in_input,"\n",
-      "Settings: ",input$in_settings,"\n",
-      "Label 1 size: ",input$in_label1_size,"\n",
-      "Label 2 size: ",input$in_label2_size,"\n",
-      "Label 3 size: ",input$in_label3_size,"\n",
-      "Label 1 x: ",input$in_label1_x,"\n",
-      "Label 2 x: ",input$in_label2_x,"\n",
-      "Label 3 x: ",input$in_label3_x,"\n",
-      "Label 1 y: ",input$in_label1_y,"\n",
-      "Label 2 y: ",input$in_label2_y,"\n",
-      "Label 3 y: ",input$in_label3_y,"\n",
-      "Logo left: ",input$in_logo_left,"\n",
-      "Logo left offset: ",input$in_logo_left_offset,"\n",
-      "Logo left scale: ",input$in_logo_left_scale,"\n",
-      "Logo right: ",input$in_logo_right,"\n",
-      "Logo right offset: ",input$in_logo_right_offset,"\n",
-      "Logo right scale: ",input$in_logo_right_scale,"\n"
-    ))
   })
   
   ## FN: fn_download -----------------------------------------------------------

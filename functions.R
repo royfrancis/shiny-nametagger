@@ -2,21 +2,20 @@
 # functions
 
 library(Cairo)
-library(shiny)
-library(shinythemes)
-library(shinyAce)
-library(png)
-library(ggplot2)
 library(curl)
-library(showtext)
+library(ggplot2)
+library(png)
+library(shiny)
 library(shinyBS)
+library(shinythemes)
+library(showtext)
 
 if(!"gfont" %in% sysfonts::font_families()) font_add_google("Lato","gfont")
 showtext_opts(dpi=300)
 
 # fn_version
 fn_version <- function() {
-  return("v1.1.1")
+  return("v1.1.2")
 }
 
 # validation
