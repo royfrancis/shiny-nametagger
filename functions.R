@@ -280,3 +280,7 @@ nametag <- function(dfr,label1_sz=8,label1_x=0.5,label1_y=0.54,
   # exports images
   mapply(function(p,id,height,width,filename,ftype,verbose) efun(p,id,height,width,filename,ftype,verbose),plist,ids,height,width,filename,ftype,verbose)
 }
+
+# get vector of logos
+logos <- c("none",list.files("www/logos",full.names = T))
+names(logos) <- gsub(".png$|.jpg$","",basename(logos))

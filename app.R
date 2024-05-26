@@ -11,7 +11,7 @@ tags$head(tags$link(rel="stylesheet",type="text/css",href="styles.css")),
   fixedRow(
       column(12,style="margin:15px;",
              fluidRow(style="margin-bottom:10px;",
-                      span(tags$img(src='nbis-lime.png',style="height:18px;"),style="vertical-align:top;display:inline-block;"),
+                      span(tags$img(src='logos/nbis-lime.png',style="height:18px;"),style="vertical-align:top;display:inline-block;"),
                       span(tags$h4("•",style="margin:0px;margin-left:6px;margin-right:6px;"),style="vertical-align:top;display:inline-block;"),
                       span(tags$h4(strong("Nametagger"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
              ),
@@ -27,10 +27,10 @@ tags$head(tags$link(rel="stylesheet",type="text/css",href="styles.css")),
       uiOutput("ui_input"),
       fluidRow(
         column(6,class="no-pad-right",
-               selectInput("in_logo_left",label="Logo left",choices=c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
+               selectInput("in_logo_left",label="Logo left",choices=logos,selected=1,multiple=FALSE)
         ),
         column(6,class="no-pad-left",
-               selectInput("in_logo_right",label="Logo right",c("None","NBIS Lime","NBIS Aqua","SciLifeLab Lime","SciLifeLab Aqua","Elixir"),selected="None",multiple=FALSE)
+               selectInput("in_logo_right",label="Logo right",choices=logos,selected=1,multiple=FALSE)
         )
       ),
       checkboxInput("in_settings","Settings",value=FALSE),
@@ -244,27 +244,21 @@ server <- function(input, output, session) {
     validate(fn_val_size(l3s))
     
     # logos --------------------------------------------------------------------
-    lr = switch(
-      input$in_logo_right,
-      "None"=NULL,
-      "NBIS Lime"="./www/nbis-lime.png",
-      "NBIS Aqua"="./www/nbis-aqua.png",
-      "SciLifeLab Lime"="./www/scilifelab-lime.png",
-      "SciLifeLab Aqua"="./www/scilifelab-aqua.png",
-      "Elixir"="./www/elixir_200.png"
-    )
-    if(!is.null(lr)) {lri <- readPNG(lr)}else{lri <- NULL}
+    if(input$in_logo_right != "none") {
+      lr <- input$in_logo_right
+      lri <- readPNG(input$in_logo_right)
+    }else{
+      lr <- NULL
+      lri <- NULL
+    }
 
-    ll = switch(
-      input$in_logo_left,
-      "None"=NULL,
-      "NBIS Lime"="./www/nbis-lime.png",
-      "NBIS Aqua"="./www/nbis-aqua.png",
-      "SciLifeLab Lime"="./www/scilifelab-lime.png",
-      "SciLifeLab Aqua"="./www/scilifelab-aqua.png",
-      "Elixir"="./www/elixir_200.png"
-    )
-    if(!is.null(ll)) {lli <- readPNG(ll)}else{lli <- NULL}
+    if(input$in_logo_left != "none") {
+      ll <- input$in_logo_left
+      lli <- readPNG(input$in_logo_left)
+    }else{
+      ll <- NULL
+      lli <- NULL
+    }
 
     # custom label y positions, offset and scaling for logos
     if(!input$in_settings) {
