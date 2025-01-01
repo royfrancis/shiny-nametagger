@@ -32,4 +32,6 @@ remotes::install_github("quarto-dev/quarto-r")
 
 This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp()`.
 
+---
+
 2025 • Roy Francis
