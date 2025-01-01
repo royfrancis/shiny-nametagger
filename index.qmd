@@ -1,0 +1,68 @@
+---
+info:
+  - line1: "Olivia Sterling"
+    line2: "Quantum Physicist"
+    line3: "Quantum Research Institute"
+    line4: "o.sterling@quantumri.edu"
+  - line1: "Marcus Finnegan"
+    line2: "Chief Technology Officer"
+    line3: ""
+    line4: "m.finnegan@techinnovators.com"
+  - line1: "Ariella Knöx"
+    line3: "Global Solutions Inc."
+    line4: "a.knox@globalsolutions.com"
+  - line1: "Theo Jansen"
+    line2: "Research Analyst"
+    line3: "Netherlands Technology Hub"
+    line4: "t.jansen@nth.nl"
+  - line1: "Leila Summers"
+    line2: "Environmental Scientist"
+    line3: "EcoLogic Research Foundation"
+    line4: "l.summers@ecologic.org"
+  - line1: "Jaxon Lee"
+    line2: "Data Scientist"
+    line3: "Australian Science Network"
+    line4: "j.lee@australiascience.net.au"
+  - line1: "Marcus Finnegan"
+    line2: "Chief Technology Officer"
+    line3: ""
+    line4: "m.finnegan@techinnovators.com"
+  - line1: "Ariella Knox"
+    line3: "Global Solutions Inc."
+    line4: "a.knox@globalsolutions.com"
+  - line1: "Theo Jansen"
+    line2: "Research Analyst"
+    line3: "Netherlands Technology Hub"
+    line4: "t.jansen@nth.nl"
+  - line1: "Leila Summers"
+    line2: "Environmental Scientist"
+    line3: "EcoLogic Research Foundation"
+    line4: "l.summers@ecologic.org"
+  - line1: "Jaxon Lee"
+    line2: "Data Scientist"
+    line3: "Australian Science Network"
+    line4: "j.lee@australiascience.net.au"
+logo-left:
+  path: "www/logos/elixir.png"
+logo-right:
+  path: "www/logos/kth.png"
+logo-left-height: 5.5mm
+logo-right-height: 5.5mm
+font-size: 16pt
+leading: 0.5em
+paper-height: 297mm
+paper-width: 210mm
+nametag-height: 55mm
+nametag-width: 90mm
+#bg-image:
+#  path: assets/abstract.png
+trim-color: "#aeb6bf"
+text-color: "#2e4053"
+text-pos-x: 0mm
+text-pos-y: 0mm
+inset: 0.3em
+format:
+  nametag-typst:
+    keep-typ: false
+    font-paths: fonts
+---

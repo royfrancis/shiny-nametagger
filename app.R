@@ -1,156 +1,197 @@
-## nametagger
-## R shinyapp to generate nametags
-## 2020 Roy Mathew Francis
+library(shiny)
+library(bslib)
+library(bsicons)
+library(quarto)
+library(markdown)
+library(colourpicker)
+library(shinyWidgets)
 
-source("functions.R")
+source("functions.r")
 
-# UI ---------------------------------------------------------------------------
+## ui --------------------------------------------------------------------------
 
-ui <- fluidPage(theme=shinytheme("flatly"),
-tags$head(tags$link(rel="stylesheet",type="text/css",href="styles.css")),
-  fixedRow(
-      column(12,style="margin:15px;",
-             fluidRow(style="margin-bottom:10px;",
-                      span(tags$img(src='logos/nbis-lime.png',style="height:18px;"),style="vertical-align:top;display:inline-block;"),
-                      span(tags$h4("•",style="margin:0px;margin-left:6px;margin-right:6px;"),style="vertical-align:top;display:inline-block;"),
-                      span(tags$h4(strong("Nametagger"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
-             ),
-    fixedRow(
-    column(3,class="box-left",
-      fluidRow(
-        column(6,class="no-pad-right",
-               selectInput("in_input","Input method",choices=c("Upload file","Paste text"),
-                           selected="Paste text",multiple=FALSE)),
-        column(6,class="no-pad-left",
-               selectInput("in_data_format","File format",choices=c("tsv","csv","csv2"),selected="csv",multiple=FALSE))
-        ),
-      uiOutput("ui_input"),
-      fluidRow(
-        column(6,class="no-pad-right",
-               selectInput("in_logo_left",label="Logo left",choices=logos,selected=1,multiple=FALSE)
-        ),
-        column(6,class="no-pad-left",
-               selectInput("in_logo_right",label="Logo right",choices=logos,selected=1,multiple=FALSE)
-        )
-      ),
-      checkboxInput("in_settings","Settings",value=FALSE),
-      div(style="margin-top:25px;margin-bottom:20px;",downloadButton("btn_download","Download")),
-      div(style="font-size:0.8em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
-    ),
-    column(6,class="box-right",
-      textOutput("out_pagecount"),
-      tags$br(),
-      div(class="img-output",
-          imageOutput("out_plot",width="auto",height="auto")
+ui <- page_fluid(
+  title = "NBIS Nametagger",
+  theme = bs_theme(preset = "zephyr", primary = "#A7C947"),
+  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
+  lang = "en",
+  card(
+    full_screen = TRUE,
+    card_header(
+      class = "app-card-header",
+      tags$div(
+        class = "app-header",
+        span(tags$img(src = "logos/nbis-lime.png", style = "height:18px;"), style = "vertical-align:top;display:inline-block;"),
+        span(tags$h5("•", style = "margin:0px;margin-left:6px;margin-right:6px;"), style = "vertical-align:top;display:inline-block;"),
+        span(tags$h5("Nametagger", style = "margin:0px;"), style = "vertical-align:middle;display:inline-block;")
       )
     ),
-    uiOutput("ui_settings")
+    layout_sidebar(
+      sidebar = sidebar(
+        width = 305,
+        div(style = "margin-top:5px;",
+          accordion(
+            open = TRUE,
+            accordion_panel("Standard input",
+              icon = bsicons::bs_icon("sliders"),
+              layout_columns(
+                selectInput("in_input", "Input method",
+                  choices = c("Upload file", "Paste text"),
+                  selected = "Paste text", multiple = FALSE
+                ),
+                tooltip(
+                  selectInput("in_data_format", "File format", choices = c("tsv", "csv", "csv2"), selected = "csv", multiple = FALSE),
+                  "Set delimiter. tsv: tab separated values (copy-paste from spreadsheet), csv: comma separated values, csv2: semicolon separated values",
+                  placement = "top"
+                )
+              ),
+              uiOutput("ui_input"),
+              popover(
+                div(class = "help-note", HTML("<span><i class='fa fa-circle-info'></i></span><span style='margin-left:5px;'>Content guide</span>")),
+                includeMarkdown("help.md"),
+                title = "Content guide"
+              ),
+              layout_columns(
+                shinyWidgets::pickerInput("in_logo_left", "Logo left", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE),
+                shinyWidgets::pickerInput("in_logo_right", "Logo right", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE),
+              ),
+              layout_columns(
+                tooltip(
+                  numericInput("in_logo_left_height", label = "Logo left height", value = 5.5, min = 0., max = 50, step = 0.1),
+                  "Set height of left logo. Value between 0 and 50 mm.",
+                  placement = "right"
+                ),
+                tooltip(
+                  numericInput("in_logo_right_height", label = "Logo right height", value = 5.5, min = 0, max = 50, step = 0.1),
+                  "Set height of right logo. Value between 0.1 and 50mm.",
+                  placement = "right"
+                )
+              )
+            )
+          )
+        ),
+        div(
+          accordion(
+            open = FALSE,
+            accordion_panel("More settings",
+              icon = bsicons::bs_icon("gear-fill"),
+              uiOutput("ui_bg"),
+              layout_columns(
+                tooltip(
+                  numericInput("in_fontsize", label = "Font size", value = 16, min = 5, max = 30, step = 1),
+                  "Set base font size. Value between 5 and 30 pt."
+                ),
+                tooltip(
+                  numericInput("in_leading", label = "Line spacing", value = 0.5, min = 0.1, max = 1, step = 0.10),
+                  "Set spacing between lines. Value between 0.1 and 1 em."
+                )
+              ),
+              layout_columns(
+                tooltip(
+                  numericInput("in_text_pos_x", label = "Text pos x", value = 0, min = -100, max = 100, step = 1),
+                  "Horizontal text position. Value between -100 and 100mm."
+                ),
+                tooltip(
+                  numericInput("in_text_pos_y", label = "Text pos y", value = 0, min = -100, max = 100, step = 1),
+                  "Vertical text position. Value between -100 and 100mm."
+                )
+              ),
+              layout_columns(
+                tooltip(
+                  colourInput("in_col_text", "Text color", "#2e4053"),
+                  "Color for all text. A hexadecimal value."
+                ),
+                tooltip(
+                  colourInput("in_col_trim", "trim color", "#aeb6bf"),
+                  "Color for dashed trim line. A hexadecimal value."
+                ),
+              ),
+            )
+          )
+        ),
+        actionButton("btn_run", "RUN", class = "btn-large"),
+        layout_columns(
+          style = "margin-top:5px;",
+          tooltip(actionButton("btn_reset", "Reset", class = "btn-warning"), "Reset all inputs", placement = "bottom"),
+          downloadButton("btn_download", "Download"),
+          col_widths = c(4, 8)
+        )
+      ),
+      uiOutput("out_pdf", width = "100%", height = "100%")
+    ),
+    card_footer(
+      class = "app-footer",
+      div(
+        class = "help-note",
+        paste0(format(Sys.time(), "%Y"), " Roy Francis • Version: ", fn_version()),
+        HTML("• <a href='https://github.com/royfrancis/shiny-nametagger' target='_blank'><i class='fab fa-github'></i></a> • <a href='mailto:zydoosu@gmail.com' target='_blank'><i class='fa fa-envelope'></i></a>")
+      )
     )
   )
 )
-)
 
-# SERVER -----------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+## server ----------------------------------------------------------------------
 
-server <- function(input, output, session) {
-  
-  ## get temporary directory
-  store <- reactiveValues(epath=tempdir())
-  
+server <- function(session, input, output) {
+  ## content block -------------------------------------------------------------
+  ## create temporary directory
+
+  temp_dir <- tempdir(check = TRUE)
+  temp_id <- paste(sample(letters, 10), collapse = "")
+  temp_dir_active <- file.path(temp_dir, temp_id)
+  cat(paste0("Working directory: ", temp_dir_active, "\n"))
+  store <- reactiveValues(wd = temp_dir_active, id = temp_id, bg_path = NULL)
+  if (!dir.exists(temp_dir_active)) dir.create(temp_dir_active)
+  copy_dirs(temp_dir_active)
+  addResourcePath(temp_id, temp_dir_active)
+
   ## UI: ui_input --------------------------------------------------------------
   ## ui to select input type: upload or paste
+
   output$ui_input <- renderUI({
     validate(fn_validate(input$in_input))
 
-    if(input$in_input=="Upload file") {
-      fileInput("in_data","Upload a text file.",multiple=FALSE)
-    }else{
+    if (input$in_input == "Upload file") {
+      fileInput("in_data", "Upload a text file.", multiple = FALSE)
+    } else {
       div(
-        textAreaInput("in_data","Data",value="label1,label2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University",width="100%",resize="vertical",height="100px"),
-        shinyBS::bsTooltip(id="in_data",title="Input must contain column names. label1 is a mandatory column. Optional columns are label2 and label3.",placement="top",trigger="hover")
+        tooltip(
+          textAreaInput("in_data", "Data", value = "line1,line2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University", width = "100%", resize = "vertical", height = "100px"),
+          "Input must contain columns named line1, line2 etc. Up to line4 is allowed.",
+          placement = "right"
+        )
       )
     }
   })
 
-  ## UI: ui_settings -----------------------------------------------------------
-  ## ui to display settings
-  output$ui_settings <- renderUI({
-    validate(fn_validate(input$in_settings))
+  ## UI ----------- ------------------------------------------------------------
+  ## render ui for bg upload and bg state
 
-    if(input$in_settings) {
-      column(3,class="box-left",
-        div(
-          tags$b("Label 1"),
-          fluidRow(
-            column(4,class="no-pad-right",
-                   numericInput("in_label1_size",label="Size",value=8,min=0,max=20,step=0.5),
-                   shinyBS::bsTooltip(id="in_label1_size",title="Size of label 1. A value between 0 and 20.0.",placement="top",trigger="hover")
-            ),
-            column(4,class="no-pad-right no-pad-left",
-                   numericInput("in_label1_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label1_x",title="Horizontal position of label 1. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
-            ),
-            column(4,class="no-pad-left",
-                   numericInput("in_label1_y",label="Ver pos",value=0.54,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label1_y",title="Vertical position of label 1. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
-            )
-          ),
-          tags$b("Label 2"),
-          fluidRow(
-            column(4,class="no-pad-right",
-                   numericInput("in_label2_size",label="Size",value=6.5,min=0,max=20,step=0.5),
-                   shinyBS::bsTooltip(id="in_label2_size",title="Size of label 2. A value between 0 and 20.0.",placement="top",trigger="hover")
-            ),
-            column(4,class="no-pad-right no-pad-left",
-                   numericInput("in_label2_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label2_x",title="Horizontal position of label 2. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
-            ),
-            column(4,class="no-pad-left",
-                   numericInput("in_label2_y",label="Ver pos",value=0.37,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label2_y",title="Vertical position of label 2. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
-            )
-          ),
-          tags$b("Label 3"),
-          fluidRow(
-            column(4,class="no-pad-right",
-                   numericInput("in_label3_size",label="Size",value=6,min=0,max=20,step=0.5),
-                   shinyBS::bsTooltip(id="in_label3_size",title="Size of label 3. A value between 0 and 20.0.",placement="top",trigger="hover")
-            ),
-            column(4,class="no-pad-right no-pad-left",
-                   numericInput("in_label3_x",label="Hor pos",value=0.5,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label3_x",title="Horizontal position of label 3. A value between 0.00 and 1.00 denoting left to right.",placement="center",trigger="hover")
-            ),
-            column(4,class="no-pad-left",
-                   numericInput("in_label3_y",label="Ver pos",value=0.22,min=0,max=1,step=0.02),
-                   shinyBS::bsTooltip(id="in_label3_y",title="Vertical position of label 3. A value between 0.00 and 1.00 denoting bottom to top.",placement="right",trigger="hover")
-            )
-          ),
-          tags$b("Logo left"),
-          fluidRow(
-            column(6,class="no-pad-right",
-                   numericInput("in_logo_left_offset",label="Offset",value=0.03,min=0,max=0.35,step=0.01),
-                   shinyBS::bsTooltip(id="in_logo_left_offset",title="Distance of left logo from left edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
-            ),
-            column(6,class="no-pad-left",
-                   numericInput("in_logo_left_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
-                   shinyBS::bsTooltip(id="in_logo_left_scale",title="Size of left logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
-            )
-          ),
-          tags$b("Logo right"),
-          fluidRow(style="margin-bottom:10px;",
-            column(6,class="no-pad-right",
-                   numericInput("in_logo_right_offset",label="Offset",value=0.03,min=0,max=0.35,step=0.01),
-                   shinyBS::bsTooltip(id="in_logo_right_offset",title="Distance of right logo from right edge and top edge. A value between 0.0 and 0.35.",placement="left",trigger="hover")
-            ),
-            column(6,class="no-pad-left",
-                   numericInput("in_logo_right_scale",label="Size",value=0.2,min=0.1,max=0.6,step=0.01),
-                   shinyBS::bsTooltip(id="in_logo_right_scale",title="Size of right logo. A value between 0.1 and 1.0.",placement="right",trigger="hover")
-            )
-          )
-        )
-      )
+  output$ui_bg <- renderUI({
+    input$btn_reset
+    tooltip(
+      fileInput("in_bg", "Background image", multiple = FALSE, accept = c("image/png", "image/jpeg", "image/tiff", "image/gif"), width = "100%", placeholder = "Upload image"),
+      "An image with dimensions close to nametag dimensions.",
+      placement = "right"
+    )
+  })
+
+  ## FN: fn_bg ---------------------------------------------------------------
+  ## function to get bg
+
+  fn_bg <- reactive({
+    validate(fn_validate_im(input$in_bg))
+
+    if (is.null(input$in_bg)) {
+      store$bg_path <- NULL
+    } else {
+      ext <- tools::file_ext(input$in_bg$datapath)
+      new_name <- paste0("bg-upload.", ext)
+      if (file.exists(file.path(store$wd, new_name))) file.remove(file.path(store$wd, new_name))
+      file.copy(input$in_bg$datapath, file.path(store$wd, new_name))
+      store$bg_path <- list(path = new_name)
     }
-
   })
 
   ## FN: fn_input --------------------------------------------------------
@@ -158,217 +199,218 @@ server <- function(input, output, session) {
 
   fn_input <- reactive({
     validate(fn_validate(input$in_input))
-    validate(fn_validate(try(input$in_data),message1="Upload a file or paste text."))
+    validate(fn_validate(try(input$in_data), message1 = "Upload a file or paste text."))
     validate(fn_validate(input$in_data_format))
-    fr <- ifelse(input$in_data_format=="tsv","\t",ifelse(input$in_data_format=="csv",",",";"))
+    fr <- ifelse(input$in_data_format == "tsv", "\t", ifelse(input$in_data_format == "csv", ",", ";"))
 
-    if(input$in_input=="Upload file") {
-      dfr <- read.delim(input$in_data$datapath,header=TRUE,sep=fr,stringsAsFactors=F)
-    }
-    if(input$in_input=="Paste text") {
-      df1 <- as.data.frame(strsplit(as.character(unlist(strsplit(input$in_data,"\n"))),fr))
-      cnames <- as.character(df1[,1])
-      df1[,1] <- NULL
-      dfr <- as.data.frame(t(df1),stringsAsFactors=F)
-      colnames(dfr) <- cnames
-      rownames(dfr) <- 1:nrow(dfr)
+    list_info <- NULL
+    if (input$in_input == "Upload file") {
+      tryCatch({
+          dfr <- read.delim(input$in_data$datapath, header = TRUE, sep = fr, stringsAsFactors = F)
+          list_info <- as.list(apply(dfr, 1, function(row) {
+            as.list(setNames(as.character(row), names(dfr)))
+          }))
+      },error = function(e) {
+          print("Error in reading data. Check input.")
+      })
+
+    } else if (input$in_input == "Paste text") {
+      tryCatch({
+        lines <- strsplit(input$in_data, "\n")[[1]]
+        headers <- strsplit(lines[1], fr)[[1]]
+        list_info <- lapply(lines[-1], function(line) {
+          values <- strsplit(line, fr)[[1]]
+          setNames(as.list(values), headers)
+        })
+      },error = function(e) {
+          print("Error in reading data. Check input.")
+      })
     }
 
-    colnames(dfr) <- tolower(colnames(dfr))
-    return(dfr)
+    return(list_info)
   })
 
-  ## FN: fn_params ------------------------------------------------------------
-  ## function to get plot params
+  ## FN: fn_vars ---------------------------------------------------------------
+  ## function to get meta variables
 
-  fn_params <- reactive({
+  fn_vars <- reactive({
+    validate(fn_validate(try(fn_input()), message1 = "No input data. Check input."))
+    v_info <- fn_input()
 
-    validate(fn_validate(fn_input()))
-    validate(fn_validate(input$in_settings))
-    validate(fn_validate(input$in_logo_left))
-    validate(fn_validate(input$in_logo_right))
-    #req(input$in_family)
-    
-    if("label1" %in% colnames(fn_input())) {l1 <- TRUE}else{l1 <- FALSE}
-    if("label2" %in% colnames(fn_input())) {l2 <- TRUE}else{l2 <- FALSE}
-    if("label3" %in% colnames(fn_input())) {l3 <- TRUE}else{l3 <- FALSE}
-    
-    # if values are available, use them, else use defaults
-    if(is.null(input$in_label1_size)){l1s <- 8}else{l1s <- input$in_label1_size}
-    if(is.null(input$in_label1_x)){l1x <- 0.5}else{l1x <- input$in_label1_x}
-    if(is.null(input$in_label1_y)){l1y <- 0.54}else{l1y <- input$in_label1_y}
-    if(is.null(input$in_label2_size)){l2s <- 6.5}else{l2s <- input$in_label2_size}
-    if(is.null(input$in_label2_x)){l2x <- 0.5}else{l2x <- input$in_label2_x}
-    if(is.null(input$in_label2_y)){l2y <- 0.37}else{l2y <- input$in_label2_y}
-    if(is.null(input$in_label3_size)){l3s <- 6}else{l3s <- input$in_label3_size}
-    if(is.null(input$in_label3_x)){l3x <- 0.5}else{l3x <- input$in_label3_x}
-    if(is.null(input$in_label3_y)){l3y <- 0.22}else{l3y <- input$in_label3_y}
-    if(is.null(input$in_logo_left_offset)){llo <- 0.04}else{llo <- input$in_logo_left_offset}
-    if(is.null(input$in_logo_right_offset)){lro <- 0.04}else{lro <- input$in_logo_right_offset}
-    if(is.null(input$in_logo_left_scale)){lls <- 0.2}else{lls <- input$in_logo_left_scale}
-    if(is.null(input$in_logo_right_scale)){lrs <- 0.2}else{lrs <- input$in_logo_right_scale}
-
-    # validation ---------------------------------------------------------------
-    fn_val <- function(x) {
-      dp <- deparse(substitute(x))
-      dp <- switch(dp,"l1x"="Label 1 Hor pos","l2x"="Label 2 Hor pos",
-                   "l3x"="Label 3 Hor pos","l1y"="Label 1 Ver pos",
-                   "l2y"="Label 2 Ver pos","l3y"="Label 3 Ver pos",
-                   "lls"="Logo left scale","lrs"="Logo right scale")
-      if(x<0 | x>1) paste0("Input '",dp,"' must be between 0 and 1.")
-    }
-    validate(fn_val(l1x))
-    validate(fn_val(l2x))
-    validate(fn_val(l3x))
-    validate(fn_val(l1y))
-    validate(fn_val(l2y))
-    validate(fn_val(l3y))
-    validate(fn_val(lls))
-    validate(fn_val(lrs))
-    
-    fn_val_offset <- function(x) {
-      dp <- deparse(substitute(x))
-      dp <- switch(dp,"llo"="Logo left Offset","lro"="Logo right Offset")
-      if(x<0 | x>0.35) paste0("Input '",dp,"' must be between 0 and 0.35.")
-    }
-    validate(fn_val_offset(llo))
-    validate(fn_val_offset(lro))
-    
-    fn_val_size <- function(x) {
-      dp <- deparse(substitute(x))
-      dp <- switch(dp,"l1s"="Label 1 Size","l2s"="Label 2 Size","l3s"="Label 3 Size")
-      if(x<0 | x>20) paste0("Input '",dp,"' must be between 0.0 and 20.0.")
-    }
-    validate(fn_val_size(l1s))
-    validate(fn_val_size(l2s))
-    validate(fn_val_size(l3s))
-    
-    # logos --------------------------------------------------------------------
-    if(input$in_logo_right != "none") {
-      lr <- input$in_logo_right
-      lri <- readPNG(input$in_logo_right)
-    }else{
-      lr <- NULL
-      lri <- NULL
+    if (is.null(input$in_fontsize)) {
+      v_fontsize <- "16pt"
+    } else {
+      validate(fn_validate_numeric(input$in_fontsize))
+      v_fontsize <- paste0(input$in_fontsize, "pt")
     }
 
-    if(input$in_logo_left != "none") {
-      ll <- input$in_logo_left
-      lli <- readPNG(input$in_logo_left)
-    }else{
-      ll <- NULL
-      lli <- NULL
+    if (is.null(input$in_leading)) {
+      v_leading <- "0.5em"
+    } else {
+      validate(fn_validate_numeric(input$in_leading))
+      v_leading <- paste0(input$in_leading, "em")
     }
 
-    # custom label y positions, offset and scaling for logos
-    if(!input$in_settings) {
-      if(is.null(lr) & is.null(ll)) {
-        if(l1) {l1y <- 0.52}
-        if(l1 & l2) {l1y <- 0.62; l2y <- 0.42}
-        if(l1 & l2 & l3) {l1y <- 0.68; l2y <- 0.48; l3y <- 0.3}
-      }
-      
-      if(!is.null(lr)) {
-        if(grepl("elixir",lr)) {lro <- 0.02; lrs <- 0.2}
-        if(grepl("scilifelab",lr)) {lro <- 0.035; lrs <- 0.33}
-        if(grepl("nbis",lr)) {lro <- 0.035; lrs <- 0.2}
-      }
-
-      if(!is.null(ll)) {
-        if(grepl("elixir",ll)) {llo <- 0.02; lls <- 0.2}
-        if(grepl("scilifelab",ll)) {llo <- 0.035; lls <- 0.33}
-        if(grepl("nbis",ll)) {llo <- 0.035; lls <- 0.2}
-      }
+    if (is.null(input$in_col_trim)) {
+      v_color_trim <- "#aeb6bf"
+    } else {
+      v_color_trim <- input$in_col_trim
     }
 
-    return(list(l1s=l1s,l1x=l1x,l1y=l1y,l2s=l2s,l2x=l2x,l2y=l2y,l3s=l3s,l3x=l3x,l3y=l3y,
-                llo=llo,lls=lls,lro=lro,lrs=lrs,lri=lri,lli=lli))
+    if (is.null(input$in_col_text)) {
+      v_color_text <- "#2e4053"
+    } else {
+      v_color_text <- input$in_col_text
+    }
+
+    if (is.null(input$in_text_pos_x)) {
+      v_text_pos_x <- "0mm"
+    } else {
+      validate(fn_validate_numeric(input$in_text_pos_x))
+      v_text_pos_x <- paste0(input$in_text_pos_x, "mm")
+    }
+
+    if (is.null(input$in_text_pos_y)) {
+      v_text_pos_y <- "0mm"
+    } else {
+      validate(fn_validate_numeric(input$in_text_pos_y))
+      v_text_pos_y <- paste0(input$in_text_pos_y, "mm")
+    }
+
+    if (!is.null(input$in_logo_right) && input$in_logo_right != "") {
+      v_logo_right <- list(path = input$in_logo_right)
+    } else {
+      v_logo_right <- ""
+    }
+
+    if (!is.null(input$in_logo_left) && input$in_logo_left != "") {
+      v_logo_left <- list(path = input$in_logo_left)
+    } else {
+      v_logo_left <- ""
+    }
+
+    if (is.null(input$in_logo_left_height)) {
+      v_logo_left_height <- "5.5mm"
+    } else {
+      validate(fn_validate_numeric(input$in_logo_left_height))
+      v_logo_left_height <- paste0(input$in_logo_left_height, "mm")
+    }
+
+    if (is.null(input$in_logo_right_height)) {
+      v_logo_right_height <- "5.5mm"
+    } else {
+      validate(fn_validate_numeric(input$in_logo_right_height))
+      v_logo_right_height <- paste0(input$in_logo_right_height, "mm")
+    }
+
+    fn_bg()
+    if (is.null(store$bg_path)) {
+      v_bg_image <- ""
+    } else {
+      v_bg_image <- list(path = store$bg_path)
+    }
+
+
+    return(list(
+      info = v_info,
+      "bg-image" = v_bg_image,
+      "logo-left" = v_logo_left,
+      "logo-right" = v_logo_right,
+      "logo-left-height" = v_logo_left_height,
+      "logo-right-height" = v_logo_right_height,
+      "font-size" = v_fontsize,
+      leading = v_leading,
+      "text-color" = v_color_text,
+      "trim-color" = v_color_trim,
+      "text-pos-x" = v_text_pos_x,
+      "text-pos-y" = v_text_pos_y,
+      "bg-image" = store$bg_path,
+      version = fn_version()
+    ))
   })
 
-  ## OUT: out_plot ------------------------------------------------------------
+  ## ER: run button binding -------------------------------------------------
+
+  evr_run <- eventReactive(input$btn_run, {
+    return(fn_vars())
+  })
+
+  ## FN: fn_build -------------------------------------------------------------
+  ## function to create pdf
+
+  fn_build <- reactive({
+    vars <- evr_run()
+    print(vars)
+    validate(fn_validate(vars))
+
+    progress_plot <- shiny::Progress$new()
+    progress_plot$set(message = "Creating PDF ...", value = 0.1)
+
+    output_file <- "nametag.pdf"
+    ppath <- store$wd
+    if (file.exists(file.path(ppath, output_file))) file.remove(file.path(ppath, output_file))
+    quarto::quarto_render(input = file.path(ppath, "nametag.qmd"), metadata = vars)
+
+    progress_plot$set(message = "Rendering PDF ...", value = 1)
+    progress_plot$close()
+  })
+
+  ## OUT: out_pdf -------------------------------------------------------------
   ## plots figure
 
-  output$out_plot <- renderImage({
-    
-    validate(fn_validate(fn_input()))
-    validate(fn_validate(fn_params()))
-    
-    progress1 <- shiny::Progress$new()
-    progress1$set(message="Capturing settings...", value=8)
-    
-    p <- fn_params()
-    
-    progress1$set(message="Generating figure...", value=30)
-    nametag(dfr=fn_input(),label1_sz=p$l1s,label1_x=p$l1x,label1_y=p$l1y,
-            label2_sz=p$l2s,label2_x=p$l2x,label2_y=p$l2y,
-            label3_sz=p$l3s,label3_x=p$l3x,label3_y=p$l3y,
-            logo_right=p$lri,logo_right_offset=p$lro,logo_right_scale=p$lrs,
-            logo_left=p$lli,logo_left_offset=p$llo,logo_left_scale=p$lls,
-            family="gfont",path=store$epath,ftype="png")
-    fname <- file.path(store$epath,"nametag_1.png")
-    
-    progress1$set(message="Completed.", value=100)
-    progress1$close()
-    
-    scaling <- 0.62
-    return(list(src=fname,contentType="image/png",
-                width=round(9*2*37.7*scaling,0),
-                height=round(5.5*4*37.7*scaling,0),
-                alt="nametagger_image"))
-  },deleteFile=TRUE)
-
-  ## OUT: out_pagecount -------------------------------------------------------
-  ## prints general variables for debugging
-  
-  output$out_pagecount <- renderText({
-    
-    req(fn_input())
-
-    npages <- ceiling(nrow(fn_input())/8)
-    paste0("Showing 1 of ",npages," pages.")
+  output$out_pdf <- renderUI({
+    if (input$btn_run == 0) {
+      return(div(p("Click 'RUN' to generate PDF.")))
+    } else {
+      fn_build()
+      return(tags$iframe(src = file.path(store$id, "nametag.pdf"), height = "100%", width = "100%"))
+    }
   })
-  
-  ## FN: fn_download -----------------------------------------------------------
-  ## function to download a zipped file with images
-
-  fn_download <- function(){
-
-    validate(fn_validate(fn_input()))
-    validate(fn_validate(fn_params()))
-
-    p <- fn_params()
-    nametag(dfr=fn_input(),label1_sz=p$l1s,label1_x=p$l1x,label1_y=p$l1y,
-            label2_sz=p$l2s,label2_x=p$l2x,label2_y=p$l2y,
-            label3_sz=p$l3s,label3_x=p$l3x,label3_y=p$l3y,
-            logo_right=p$lri,logo_right_offset=p$lro,logo_right_scale=p$lrs,
-            logo_left=p$lli,logo_left_offset=p$llo,logo_left_scale=p$lls,
-            path=store$epath,family="gfont",ftype="pdf")
-
-    epathn <- file.path(store$epath,"nametagger.zip")
-    if(exists(epathn)) unlink(epathn)
-    
-    zip(epathn,files=list.files(path=store$epath,pattern="pdf",full.names=TRUE))
-    unlink(list.files(path=store$epath,pattern="pdf",full.names=TRUE))
-  }
 
   ## DHL: btn_download ---------------------------------------------------------
   ## download handler for downloading zipped file
 
   output$btn_download <- downloadHandler(
-    filename="nametagger.zip",
-    content=function(file) {
-      
-      progress <- shiny::Progress$new()
-      progress$set(message="Generating PDFs...", value=52)
-      fn_download()
-      
-      progress$set(message="Downloading zipped file...", value=90)
-      file.copy(file.path(store$epath,"nametagger.zip"),file,overwrite=T)
-      
-      progress$set(message="Completed.",value=100)
-      progress$close()
+    filename = "nametag.pdf",
+    content = function(file) {
+      fn_build()
+      cpath <- file.path(store$wd, "nametag.pdf")
+      file.copy(cpath, file, overwrite = T)
+      unlink(cpath)
     }
   )
+
+  ## OBS: btn_reset ------------------------------------------------------------
+  ## observer for reset
+
+  observeEvent(input$btn_reset, {
+    updateSelectInput(session, "in_input", "Input method", choices = c("Upload file", "Paste text"), selected = "Paste text")
+    updateSelectInput(session, "in_data_format", "File format", choices = c("tsv", "csv", "csv2"), selected = "csv")
+    updateTextAreaInput(session, "in_data", "Data", value = "line1,line2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University")
+    updatePickerInput(session, "in_logo_left", "Logo left", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1)
+    updatePickerInput(session, "in_logo_right", "Logo right", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1)
+    updateNumericInput(session, "in_logo_left_height", "Logo left height", value = 5.5)
+    updateNumericInput(session, "in_logo_right_height", "Logo right height", value = 5.5)
+    updateNumericInput(session, "in_fontsize", "Font size", value = 16)
+    updateNumericInput(session, "in_leading", "Line spacing", value = 0.5)
+    updateColourInput(session, "in_col_text", "Text color", "#2e4053")
+    updateColourInput(session, "in_col_trim", "trim color", "#aeb6bf")
+    updateNumericInput(session, "in_text_pos_x", "Text pos x", value = 0)
+    updateNumericInput(session, "in_text_pos_y", "Text pos y", value = 0)
+    store$bg_path <- NULL
+  })
+
+  ## OSE -----------------------------------------------------------------------
+  ## delete user directory when session ends
+
+  session$onSessionEnded(function() {
+    cat(paste0("Removing working directory: ", isolate(store$wd), " ...\n"))
+    if (dir.exists(isolate(store$wd))) {
+      unlink(isolate(store$wd), recursive = TRUE)
+    }
+  })
 }
 
-shinyApp(ui=ui, server=server)
+## launch ----------------------------------------------------------------------
+
+shinyApp(ui = ui, server = server)

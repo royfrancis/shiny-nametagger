@@ -1,76 +1,85 @@
-/* custom css styles */
+/* shiny-certificate custom styles */
 
-#in_data {
-  font-size: 0.85em;
+.card.bslib-card {
+  height: calc(100vh - (calc(var(--bs-gutter-x) * .5))*2);
+  margin: calc(var(--bs-gutter-x) * .5) 0;
 }
 
-.progress > #in_data_progress {
-  margin-bottom:0;
+.bslib-sidebar-layout>.sidebar>.sidebar-content {
+  padding: 1em;
+  padding-top: 2em;
+  gap: 6px;
 }
 
-.checkbox {
-  margin-bottom:0;
+.form-group {
+  margin-bottom: 0;
+}
+
+.shiny-input-container .control-label {
+  margin-bottom: 0;
+}
+
+label.control-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-left: 0.3rem;
+}
+
+hr {
+  color: gray;
+  margin: 0.8rem 0;
+}
+
+#out_pdf {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+}
+
+.form-control {
+  font-size: 0.8rem;
+}
+
+#in_names,
+#in_content,
+#in_teacher,
+#in_footnotes {
+  white-space: pre;
 }
 
 .help-note {
-  font-size: 0.9em;
+  font-size: 0.7rem;
   color: #C0C0C0;
-  padding: 6px;
-  border-radius: 3px;
+  margin-top: 2px;
 }
 
-.help-note-yellow {
-  font-size: 0.9em;
-  color: #8a6d3b;
-  background-color: #fcf8e3;
-  border-color: #faebcc;
-  padding: 6px;
-  margin-bottom: 3px;
-  border-radius: 3px;
+.app-header {
+  padding: 1em;
+  background-image: url("banner.png");
+  background-repeat: no-repeat;
+  background-position: right;
+  background-size: cover;
 }
 
-.img-output {
-  -webkit-box-shadow: 1px 1px 6px #E0E0E0;
-  -moz-box-shadow: 1px 1px 6px #E0E0E0;
-  box-shadow: 1px 1px 6px #E0E0E0;
-  display: inline-block;
+.app-card-header {
+  padding: 0;
 }
 
-.box-left {
-  max-width: 320px;
-  border: 1px solid #dddde5;
-  border-radius: 6px;
-  padding-bottom: 15px;
-  padding-top: 15px;
-  margin-bottom: 24px;
-  background-color: #ecf0f1;
-  transition: .1s;
-  -webkit-box-shadow: 1px 1px 6px #E0E0E0;
-  -moz-box-shadow: 1px 1px 6px #E0E0E0;
-  box-shadow: 1px 1px 6px #E0E0E0;
+.app-footer {
+  background-color: #FFFFFF;
+  padding: 0.5em;
 }
 
-.box-right {
-  max-width: 450px;
-  min-width: 400px;
-  padding-top: 15px;
-  padding-bottom: 15px;
-  border-radius: 8px;
+/* logo picker */
+.logo-picker-outer {
+  width: 80px;
 }
 
-.form-control:focus, .selectize-input.focus {
-  border: 2px solid #95a5a6;
-}
-
-.selectize-input {
-  border: 2px solid #dce4ec;
-}
-
-@media all and (min-width: 768px) {
-  .no-pad-right {
-    padding-right: 7.5px;
-  }
-  .no-pad-left {
-    padding-left: 7.5px;
-  }
+.logo-picker-inner {
+ display: inline;
+ vertical-align: middle;
+ padding-left: 10px;
 }

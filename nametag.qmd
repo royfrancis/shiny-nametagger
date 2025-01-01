@@ -1,0 +1,6 @@
+---
+format:
+  nametag-typst:
+    keep-typ: true
+    font-paths: fonts
+---

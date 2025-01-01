@@ -2,9 +2,9 @@
 
 [![gh-actions-build-status](https://github.com/royfrancis/shiny-nametagger/workflows/build/badge.svg)](https://github.com/royfrancis/shiny-nametagger/actions?workflow=build) [![docker-hub](https://img.shields.io/docker/image-size/royfrancis/shiny-nametagger?label=dockerhub)](https://hub.docker.com/repository/docker/royfrancis/shiny-nametagger)
 
-This is an R shiny app to create labels for clip-on name badges.
+A web app to create labels for clip-on name badges.
 
-![](preview.png)
+![](preview.jpg)
 
 ## Running the app
 
@@ -12,10 +12,10 @@ This is an R shiny app to create labels for clip-on name badges.
 
 Click [here](https://nametag.serve.scilifelab.se) to access an online instance of this app. This link may not always be active.
 
-### Run using docker
+### Run in a docker container
 
 ```
-docker run --rm -p 8787:8787 royfrancis/shiny-nametagger:latest
+docker run --platform=linux/amd64 --rm -p 8787:8787 royfrancis/shiny-nametagger:latest
 ```
 
 The app should be available through a web browser at `http://0.0.0.0:8787`.
@@ -25,9 +25,11 @@ The app should be available through a web browser at `http://0.0.0.0:8787`.
 Install the following R packages:
 
 ```
-install.packages(c("Cairo","curl","ggplot2","ggtext","png","shiny","shinythemes","shinyBS","showtext"))
+install.packages(c("shiny","markdown","colourpicker","shinyWidgets","bsicons"))
+remotes::install_github("rstudio/bslib")
+remotes::install_github("quarto-dev/quarto-r")
 ```
 
-This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp("app.R")`.
+This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp()`.
 
-2024 • Roy Francis
+2025 • Roy Francis
