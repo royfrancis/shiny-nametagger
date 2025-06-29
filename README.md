@@ -25,12 +25,18 @@ The app should be available through a web browser at `http://0.0.0.0:8787`.
 Install the following R packages:
 
 ```
-install.packages(c("shiny","markdown","colourpicker","shinyWidgets","bsicons"))
+install.packages(c("shiny","markdown","colourpicker","shinyWidgets","bsicons","readr"))
 remotes::install_github("rstudio/bslib")
 remotes::install_github("quarto-dev/quarto-r")
 ```
 
 This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp()`.
+
+## Acknowledgements
+
+- This app is built using R, [Shiny](https://shiny.posit.co/), [Quarto](https://quarto.org/) and [Typst](https://typst.app)
+- Thanks to [DataHub](https://datahub.io/core/country-list) for 2 letter country codes
+- Thanks to [HatScripts](https://github.com/HatScripts/circle-flags) for circular flags
 
 ---
 
