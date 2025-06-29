@@ -1,3 +1,6 @@
+## shiny-nametagger: A Shiny app to create nametags for clip-on badges
+## Roy Francis
+
 library(shiny)
 library(bslib)
 library(bsicons)
@@ -5,7 +8,9 @@ library(quarto)
 library(markdown)
 library(colourpicker)
 library(shinyWidgets)
+library(readr)
 
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
 source("functions.r")
 
 ## ui --------------------------------------------------------------------------
@@ -13,7 +18,12 @@ source("functions.r")
 ui <- page_fluid(
   title = "NBIS Nametagger",
   theme = bs_theme(preset = "zephyr", primary = "#A7C947"),
-  tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")),
+  tags$head(
+    tags$meta(property = "og:title", content = "Nametagger"),
+    tags$meta(property = "og:description", content = "Generate Nametags for Clip-On Badges"),
+    tags$meta(property = "og:image", content = "www/seo.png"),
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+    ),
   lang = "en",
   card(
     full_screen = TRUE,
@@ -21,7 +31,7 @@ ui <- page_fluid(
       class = "app-card-header",
       tags$div(
         class = "app-header",
-        span(tags$img(src = "logos/nbis-lime.png", style = "height:18px;"), style = "vertical-align:top;display:inline-block;"),
+        span(tags$img(src = "logos/nbis.svg", style = "height:18px;"), style = "vertical-align:top;display:inline-block;"),
         span(tags$h5("•", style = "margin:0px;margin-left:6px;margin-right:6px;"), style = "vertical-align:top;display:inline-block;"),
         span(tags$h5("Nametagger", style = "margin:0px;"), style = "vertical-align:middle;display:inline-block;")
       )
@@ -52,8 +62,12 @@ ui <- page_fluid(
                 title = "Content guide"
               ),
               layout_columns(
-                shinyWidgets::pickerInput("in_logo_left", "Logo left", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE),
-                shinyWidgets::pickerInput("in_logo_right", "Logo right", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE),
+                selectInput("in_logo_left_option", "Logo left", choices = c("Select", "Upload"), selected = "Select"),
+                selectInput("in_logo_right_option", "Logo right", choices = c("Select", "Upload"), selected = "Select")
+              ),
+              layout_columns(
+                uiOutput("ui_logo_left"),
+                uiOutput("ui_logo_right")
               ),
               layout_columns(
                 tooltip(
@@ -104,8 +118,8 @@ ui <- page_fluid(
                 tooltip(
                   colourInput("in_col_trim", "trim color", "#aeb6bf"),
                   "Color for dashed trim line. A hexadecimal value."
-                ),
-              ),
+                )
+              )
             )
           )
         ),
@@ -124,7 +138,7 @@ ui <- page_fluid(
       div(
         class = "help-note",
         paste0(format(Sys.time(), "%Y"), " Roy Francis • Version: ", fn_version()),
-        HTML("• <a href='https://github.com/royfrancis/shiny-nametagger' target='_blank'><i class='fab fa-github'></i></a> • <a href='mailto:zydoosu@gmail.com' target='_blank'><i class='fa fa-envelope'></i></a>")
+        HTML("• <a href='https://github.com/royfrancis/shiny-nametagger' target='_blank'><i class='fab fa-github'></i></a>")
       )
     )
   )
@@ -141,7 +155,7 @@ server <- function(session, input, output) {
   temp_id <- paste(sample(letters, 10), collapse = "")
   temp_dir_active <- file.path(temp_dir, temp_id)
   cat(paste0("Working directory: ", temp_dir_active, "\n"))
-  store <- reactiveValues(wd = temp_dir_active, id = temp_id, bg_path = NULL)
+  store <- reactiveValues(wd = temp_dir_active, id = temp_id, bg_path = NULL, logo_left_path = NULL, logo_right_path = NULL)
   if (!dir.exists(temp_dir_active)) dir.create(temp_dir_active)
   copy_dirs(temp_dir_active)
   addResourcePath(temp_id, temp_dir_active)
@@ -153,15 +167,81 @@ server <- function(session, input, output) {
     validate(fn_validate(input$in_input))
 
     if (input$in_input == "Upload file") {
-      fileInput("in_data", "Upload a text file.", multiple = FALSE)
+      fileInput("in_data", "Upload a text file. Use UTF-8 encoding.", multiple = FALSE)
     } else {
       div(
         tooltip(
-          textAreaInput("in_data", "Data", value = "line1,line2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University", width = "100%", resize = "vertical", height = "100px"),
-          "Input must contain columns named line1, line2 etc. Up to line4 is allowed.",
+          textAreaInput("in_data", "Data", value = "line1,line2\nJohn Döe,Uppsala University\nMary Jane,Stockholm University", width = "100%", resize = "vertical", height = "100px"),
+          "Input must contain columns named line1, line2 etc. Up to line5 is allowed. Use UTF-8 encoding.",
           placement = "right"
         )
       )
+    }
+  })
+
+  ## UI ----------- ------------------------------------------------------------
+  ## render ui for logo left
+
+  output$ui_logo_left <- renderUI({
+    input$btn_reset
+    if (input$in_logo_left_option == "Select") {
+      shinyWidgets::pickerInput("in_logo_left", "Select logo", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE)
+    } else if (input$in_logo_left_option == "Upload") {
+      tooltip(
+        fileInput("in_logo_left", "Upload logo", multiple = FALSE, accept = c("image/png", "image/jpeg", "image/tiff", "image/gif", "image/svg"), width = "100%", placeholder = "Upload image"),
+        "A logo to display on the top left.", placement = "right"
+      )
+    }
+  })
+
+  ## FN: fn_logo_left ----------------------------------------------------------
+  ## function to get left logo
+
+  fn_logo_left <- reactive({
+    if (input$in_logo_left_option == "Upload") {
+      if (is.null(input$in_logo_left)) {
+        store$logo_left_path <- NULL
+      } else {
+        validate(fn_validate_im(input$in_logo_left))
+        ext <- tools::file_ext(input$in_logo_left$datapath)
+        new_name <- paste0("left-logo-upload.", ext)
+        if (file.exists(file.path(store$wd, new_name))) file.remove(file.path(store$wd, new_name))
+        file.copy(input$in_logo_left$datapath, file.path(store$wd, new_name))
+        store$logo_left_path <- list(path = new_name)
+      }
+    }
+  })
+
+  ## UI ----------- ------------------------------------------------------------
+  ## render ui for logo right
+
+  output$ui_logo_right <- renderUI({
+    input$btn_reset
+    if (input$in_logo_right_option == "Select") {
+      shinyWidgets::pickerInput("in_logo_right", "Select logo", choices = get_logos(), choicesOpt = list(content = logos$img), selected = 1, multiple = FALSE)
+    } else if (input$in_logo_right_option == "Upload") {
+      tooltip(
+        fileInput("in_logo_right", "Upload logo", multiple = FALSE, accept = c("image/png", "image/jpeg", "image/tiff", "image/gif", "image/svg"), width = "100%", placeholder = "Upload image"),
+        "A logo to display on the top right.", placement = "right"
+      )
+    }
+  })
+
+  ## FN: fn_logo_right ----------------------------------------------------------
+  ## function to get right logo
+
+  fn_logo_right <- reactive({
+    if (input$in_logo_right_option == "Upload") {
+      if (is.null(input$in_logo_right)) {
+        store$logo_right_path <- NULL
+      } else {
+        validate(fn_validate_im(input$in_logo_right))
+        ext <- tools::file_ext(input$in_logo_right$datapath)
+        new_name <- paste0("right-logo-upload.", ext)
+        if (file.exists(file.path(store$wd, new_name))) file.remove(file.path(store$wd, new_name))
+        file.copy(input$in_logo_right$datapath, file.path(store$wd, new_name))
+        store$logo_right_path <- list(path = new_name)
+      }
     }
   })
 
@@ -172,7 +252,7 @@ server <- function(session, input, output) {
     input$btn_reset
     tooltip(
       fileInput("in_bg", "Background image", multiple = FALSE, accept = c("image/png", "image/jpeg", "image/tiff", "image/gif"), width = "100%", placeholder = "Upload image"),
-      "An image with dimensions close to nametag dimensions.",
+      "An image with dimensions close to nametag dimensions: 90mm x 55mm.",
       placement = "right"
     )
   })
@@ -206,26 +286,31 @@ server <- function(session, input, output) {
     list_info <- NULL
     if (input$in_input == "Upload file") {
       tryCatch({
-          dfr <- read.delim(input$in_data$datapath, header = TRUE, sep = fr, stringsAsFactors = F)
-          list_info <- as.list(apply(dfr, 1, function(row) {
-            as.list(setNames(as.character(row), names(dfr)))
-          }))
+          dfr <- readr::read_delim(input$in_data$datapath, delim = fr, locale = locale(encoding = "UTF-8"))
       },error = function(e) {
-          print("Error in reading data. Check input.")
+          print("Error in reading data. Check input. Headers must be present.")
       })
-
     } else if (input$in_input == "Paste text") {
       tryCatch({
-        lines <- strsplit(input$in_data, "\n")[[1]]
-        headers <- strsplit(lines[1], fr)[[1]]
-        list_info <- lapply(lines[-1], function(line) {
-          values <- strsplit(line, fr)[[1]]
-          setNames(as.list(values), headers)
-        })
+        dfr <- readr::read_delim(input$in_data, delim = fr, locale = locale(encoding = "UTF-8"))
       },error = function(e) {
-          print("Error in reading data. Check input.")
+        print("Error in reading data. Check input. Headers must be present.")
       })
     }
+
+    # add flag icon if line5 is a valid country code
+    if ("line5" %in% names(dfr)) {
+      matched_indices <- match(dfr$line5, cou$code) # Match once and use the indices
+      valid_matches <- !is.na(matched_indices) # Logical vector for valid matches
+
+      dfr$icon <- ifelse(valid_matches, cou$path[matched_indices], "")
+      dfr$line5 <- ifelse(valid_matches, cou$name[matched_indices], dfr$line5)
+    }
+
+    # convert to list
+    list_info <- as.list(apply(dfr, 1, function(row) {
+      as.list(setNames(as.character(row), names(dfr)))
+    }))
 
     return(list_info)
   })
@@ -277,16 +362,38 @@ server <- function(session, input, output) {
       v_text_pos_y <- paste0(input$in_text_pos_y, "mm")
     }
 
-    if (!is.null(input$in_logo_right) && input$in_logo_right != "") {
-      v_logo_right <- list(path = input$in_logo_right)
-    } else {
-      v_logo_right <- ""
-    }
-
-    if (!is.null(input$in_logo_left) && input$in_logo_left != "") {
-      v_logo_left <- list(path = input$in_logo_left)
+    if (input$in_logo_left_option == "Select") {
+      if (!is.null(input$in_logo_left) && input$in_logo_left != "") {
+        v_logo_left <- list(path = input$in_logo_left)
+      } else {
+        v_logo_left <- NULL
+      }
+    } else if (input$in_logo_left_option == "Upload") {
+      fn_logo_left()
+      if (is.null(store$logo_left_path)) {
+        v_logo_left <- ""
+      } else {
+        v_logo_left <- store$logo_left_path
+      }
     } else {
       v_logo_left <- ""
+    }
+
+    if (input$in_logo_right_option == "Select") {
+      if (!is.null(input$in_logo_right) && input$in_logo_right != "") {
+        v_logo_right <- list(path = input$in_logo_right)
+      } else {
+        v_logo_right <- NULL
+      }
+    } else if (input$in_logo_right_option == "Upload") {
+      fn_logo_right()
+      if (is.null(store$logo_right_path)) {
+        v_logo_right <- ""
+      } else {
+        v_logo_right <- store$logo_right_path
+      }
+    } else {
+      v_logo_right <- ""
     }
 
     if (is.null(input$in_logo_left_height)) {

@@ -4,6 +4,8 @@ info:
     line2: "Quantum Physicist"
     line3: "Quantum Research Institute"
     line4: "o.sterling@quantumri.edu"
+    line5: "United states"
+    icon: "www/flags/us.svg"
   - line1: "Marcus Finnegan"
     line2: "Chief Technology Officer"
     line3: ""
@@ -61,6 +63,7 @@ text-color: "#2e4053"
 text-pos-x: 0mm
 text-pos-y: 0mm
 inset: 0.3em
+icon-size: 4.5mm
 format:
   nametag-typst:
     keep-typ: false

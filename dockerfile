@@ -2,7 +2,7 @@ FROM ghcr.io/rocker-org/shiny:4.4.1
 LABEL Description="Docker image for shiny-nametagger"
 LABEL authors="Roy Francis"
 LABEL org.opencontainers.image.source="https://github.com/royfrancis/shiny-nametagger"
-ARG QUARTO_VERSION="1.6.39"
+ARG QUARTO_VERSION="1.7.32"
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -12,7 +12,7 @@ RUN apt-get update \
     && apt-get install -y ./quarto-linux-amd64.deb \
     && rm -rf ./quarto-linux-amd64.deb \
     && rm -rf /var/lib/apt/lists/* \
-    && install2.r --error --skipinstalled markdown remotes colourpicker shinyWidgets bsicons \
+    && install2.r --error --skipinstalled markdown remotes colourpicker shinyWidgets bsicons readr \
     && Rscript -e 'remotes::install_github("rstudio/bslib");remotes::install_github("quarto-dev/quarto-r")' \
     && rm -rf /tmp/downloaded_packages
 

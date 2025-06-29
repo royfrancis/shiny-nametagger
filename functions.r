@@ -11,7 +11,7 @@ fn_dir <- function(session) {
 
 # return version
 fn_version <- function() {
-  return("v1.2.1")
+  return("v1.2.2")
 }
 
 # validation
@@ -99,12 +99,18 @@ copy_dirs <- function(path) {
   }
 }
 
+# country data, 248 countries
+# data from https://github.com/datasets/country-list/blob/main/data.csv
+# flags from https://github.com/HatScripts/circle-flags
+cou <- readr::read_csv("country.csv", locale = locale(encoding = "UTF-8"))
+cou$path <- paste0("www/flags/", cou$code, ".svg")
+
 # set defaults -----------------------------------------------------------------
 
 # get vector of logos
 get_logos <- function() {
   logos <- c("", list.files("www/logos", full.names = TRUE))
-  names(logos) <- gsub(".png$|.jpg$", "", basename(logos))
+  names(logos) <- gsub(".png$|.jpg$|.svg$", "", basename(logos))
   names(logos)[1] <- "none"
   return(logos)
 }
