@@ -5,7 +5,9 @@ library(quarto)
 library(markdown)
 library(colourpicker)
 library(shinyWidgets)
+library(readr)
 
+Sys.setlocale("LC_ALL", "en_US.UTF-8")
 source("functions.r")
 
 ## ui --------------------------------------------------------------------------
@@ -104,8 +106,8 @@ ui <- page_fluid(
                 tooltip(
                   colourInput("in_col_trim", "trim color", "#aeb6bf"),
                   "Color for dashed trim line. A hexadecimal value."
-                ),
-              ),
+                )
+              )
             )
           )
         ),
@@ -153,12 +155,12 @@ server <- function(session, input, output) {
     validate(fn_validate(input$in_input))
 
     if (input$in_input == "Upload file") {
-      fileInput("in_data", "Upload a text file.", multiple = FALSE)
+      fileInput("in_data", "Upload a text file. Use UTF-8 encoding.", multiple = FALSE)
     } else {
       div(
         tooltip(
-          textAreaInput("in_data", "Data", value = "line1,line2\nJohn Doe,Uppsala University\nMary Jane,Stockholm University", width = "100%", resize = "vertical", height = "100px"),
-          "Input must contain columns named line1, line2 etc. Up to line4 is allowed.",
+          textAreaInput("in_data", "Data", value = "line1,line2\nJohn Döe,Uppsala University\nMary Jane,Stockholm University", width = "100%", resize = "vertical", height = "100px"),
+          "Input must contain columns named line1, line2 etc. Up to line5 is allowed. Use UTF-8 encoding.",
           placement = "right"
         )
       )
@@ -206,26 +208,31 @@ server <- function(session, input, output) {
     list_info <- NULL
     if (input$in_input == "Upload file") {
       tryCatch({
-          dfr <- read.delim(input$in_data$datapath, header = TRUE, sep = fr, stringsAsFactors = F)
-          list_info <- as.list(apply(dfr, 1, function(row) {
-            as.list(setNames(as.character(row), names(dfr)))
-          }))
+          dfr <- readr::read_delim(input$in_data$datapath, delim = fr, locale = locale(encoding = "UTF-8"))
       },error = function(e) {
-          print("Error in reading data. Check input.")
+          print("Error in reading data. Check input. Headers must be present.")
       })
-
     } else if (input$in_input == "Paste text") {
       tryCatch({
-        lines <- strsplit(input$in_data, "\n")[[1]]
-        headers <- strsplit(lines[1], fr)[[1]]
-        list_info <- lapply(lines[-1], function(line) {
-          values <- strsplit(line, fr)[[1]]
-          setNames(as.list(values), headers)
-        })
+        dfr <- readr::read_delim(input$in_data, delim = fr, locale = locale(encoding = "UTF-8"))
       },error = function(e) {
-          print("Error in reading data. Check input.")
+        print("Error in reading data. Check input. Headers must be present.")
       })
     }
+
+    # add flag icon if line5 is a valid country code
+    if ("line5" %in% names(dfr)) {
+      matched_indices <- match(dfr$line5, cou$code) # Match once and use the indices
+      valid_matches <- !is.na(matched_indices) # Logical vector for valid matches
+
+      dfr$icon <- ifelse(valid_matches, cou$path[matched_indices], "")
+      dfr$line5 <- ifelse(valid_matches, cou$name[matched_indices], dfr$line5)
+    }
+
+    # convert to list
+    list_info <- as.list(apply(dfr, 1, function(row) {
+      as.list(setNames(as.character(row), names(dfr)))
+    }))
 
     return(list_info)
   })
