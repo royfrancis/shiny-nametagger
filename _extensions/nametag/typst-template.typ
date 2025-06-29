@@ -102,7 +102,7 @@
       
       block(
         fill: if (bg-image != none and bg-image != "") {
-          pattern(
+          tiling(
             image(bg-image.path, height: nametag-height, width: nametag-width, fit: "cover")
           )
         } else {
