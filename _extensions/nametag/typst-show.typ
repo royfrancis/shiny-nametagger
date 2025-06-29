@@ -8,6 +8,8 @@
       line2: [$it.line2$],
       line3: [$it.line3$],
       line4: [$it.line4$],
+      line5: [$it.line5$],
+      icon: "$it.icon$",
     )$sep$,
     $endfor$,
     ),
@@ -81,5 +83,9 @@
 
   $if(inset)$
     inset: $inset$,
+  $endif$
+
+  $if(icon-size)$
+    icon-size: $icon-size$,
   $endif$
 )

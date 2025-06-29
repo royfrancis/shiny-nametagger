@@ -54,7 +54,8 @@
   text-color: "#2e4053",
   text-pos-x: 0mm,
   text-pos-y: 0mm,
-  inset: 0.3em
+  inset: 0.3em,
+  icon-size: 4.5mm
   
 ) = {
 
@@ -65,9 +66,7 @@
   set page(
     height: paper-height,
     width: paper-width,
-    //margin: (left: 0cm, right: 0cm, top:0cm, bottom:0cm)
     margin: (left: margin-x, right: margin-x, top:margin-y, bottom:margin-y)
-    //margin: (left: 1.5cm, right: 1.5cm, top: 1.1cm, bottom: 1.1cm)
   )
   set text(font-size, font: "Lato", fill: rgb(remove-escape(text-color)))
   set par(leading: leading)
@@ -90,11 +89,16 @@
         } else { 
           "" 
         }) + (if item.line4 != "" and item.line4 != none and item.line4 != [] { 
-          style-light(item.line4)
+          style-light(item.line4) + "\n"
         } else { 
           "" 
-        }
-      );
+        }) + (if item.line5 != "" and item.line5 != none and item.line5 != [] {
+          style-light(item.line5)
+          if(item.icon != none and item.icon != "") {
+            h(2mm)
+            box(pad(bottom: -0.2mm, image(item.icon, height: icon-size)))
+          }
+        });
       
       block(
         fill: if (bg-image != none and bg-image != "") {

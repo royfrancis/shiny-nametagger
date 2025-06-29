@@ -1,6 +1,6 @@
 title: Nametag
 author: Roy Francis
-version: 0.0.5
+version: 0.0.6
 quarto-required: ">=1.4.533"
 contributes:
   formats:
