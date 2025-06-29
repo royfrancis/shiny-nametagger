@@ -10,7 +10,7 @@ A web app to create labels for clip-on name badges.
 
 ### Run online
 
-Click [here](https://nametag.serve.scilifelab.se) to access an online instance of this app. This link may not always be active.
+Click [here](https://nametagger.serve.scilifelab.se) to access an online instance of this app. This link may not always be active.
 
 ### Run in a docker container
 
